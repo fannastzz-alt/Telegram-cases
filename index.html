@@ -94,7 +94,7 @@
         .roulette-wrapper {
             position: relative;
             width: 100%;
-            height: 90px;
+            height: 95px;
             background: #1c1c1e;
             border-radius: 12px;
             overflow: hidden;
@@ -127,21 +127,25 @@
 
         .item-card {
             width: 90px;
-            height: 90px;
+            height: 95px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             border-right: 1px solid #2c2c2e;
             flex-shrink: 0;
             background: #2c2c2e;
+            padding: 6px;
         }
 
-        .item-emoji {
-            font-size: 26px;
-            margin-bottom: 4px;
+        /* Стили для картинок предметов в рулетке */
+        .item-img {
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
+            margin-bottom: 6px;
         }
 
         /* Главная кнопка кручения */
@@ -199,17 +203,23 @@
             flex-direction: column;
             align-items: center;
             background: #1c1c1e;
-            padding: 15px 30px;
+            padding: 20px 40px;
             border-radius: 12px;
             border: 2px solid #ffd60a;
             margin-bottom: 20px;
-            min-width: 150px;
+            min-width: 160px;
+        }
+
+        .reward-img {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            margin-bottom: 10px;
         }
 
         .reward-name {
             font-size: 16px;
             font-weight: bold;
-            margin-top: 5px;
         }
 
         .choice-buttons {
@@ -267,7 +277,7 @@
     <div class="reward-panel" id="reward-block">
         <div class="reward-title">🎉 Поздравляем! Ваш выигрыш:</div>
         <div class="reward-item" id="reward-card">
-            <span class="item-emoji" id="reward-emoji">❓</span>
+            <img class="reward-img" id="reward-image" src="" alt="выигрыш">
             <span class="reward-name" id="reward-name">Предмет</span>
         </div>
         <div class="choice-buttons">
@@ -279,27 +289,27 @@
     <script>
         // Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Расширяем на весь экран
+        tg.expand();
 
-        // Подгружаем имя пользователя
+        // Подгружаем имя пользователя из Telegram
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             document.getElementById('username').innerText = tg.initDataUnsafe.user.first_name;
         }
 
-        // Игровая база данных
+        // Логика баланса
         let balance = 1000;
         const spinCost = 150;
         let lastWonItem = null;
 
-        // Список возможных предметов [Название, Эмодзи, Цена продажи, Цвет редкости]
+        // Список предметов: [Название, Путь к картинке, Цена продажи, Цвет редкости]
         const pool = [
-            ["Froggy", "🐸", 50, "#30d158"],
-            ["Froggy", "🐸", 50, "#30d158"],
-            ["Rose", "🌹", 100, "#0a84ff"],
-            ["Rose", "🌹", 100, "#0a84ff"],
-            ["Birdy", "🐦", 120, "#bf5af2"],
-            ["Strike Key", "🔑", 300, "#ffd60a"],
-            ["Diamond", "💎", 800, "#ff9f0a"]
+            ["Froggy", "frog.png", 50, "#30d158"],
+            ["Froggy", "frog.png", 50, "#30d158"],
+            ["Rose", "rose.png", 100, "#0a84ff"],
+            ["Rose", "rose.png", 100, "#0a84ff"],
+            ["Birdy", "bird.png", 120, "#bf5af2"],
+            ["Strike Key", "key.png", 300, "#ffd60a"],
+            ["Diamond", "diamond.png", 800, "#ff9f0a"]
         ];
 
         const track = document.getElementById('roulette-track');
@@ -308,81 +318,68 @@
         const rewardBlock = document.getElementById('reward-block');
         const balanceDisplay = document.getElementById('balance-display');
 
-        const cardWidth = 90; // Ширина одной карточки
+        const cardWidth = 90; // Ширина карточки в пикселях
 
-        // Генерация начальной ленты рулетки
+        // Наполнение рулетки перед стартом
         function setupRoulette() {
             track.innerHTML = '';
-            // Создаем длинную ленту из случайных предметов
             for (let i = 0; i < 50; i++) {
                 const randomItem = pool[Math.floor(Math.random() * pool.length)];
                 const card = document.createElement('div');
                 card.className = 'item-card';
                 card.style.borderBottom = `4px solid ${randomItem[3]}`;
                 card.innerHTML = `
-                    <span class="item-emoji">${randomItem[1]}</span>
+                    <img class="item-img" src="${randomItem[1]}" alt="">
                     <span>${randomItem[0]}</span>
                 `;
                 track.appendChild(card);
             }
         }
 
-        // Запуск крутилки
+        // Функция запуска анимации
         function startSpin() {
-            // Проверка баланса
             if (balance < spinCost) {
                 tg.HapticFeedback.notificationOccurred('error');
                 alert("Недостаточно монет для открытия кейса!");
                 return;
             }
 
-            // Списываем баланс
             balance -= spinCost;
             updateBalanceDisplay();
             
-            // Блокируем кнопку и прячем старый выигрыш
             spinBtn.disabled = true;
             rewardBlock.style.display = 'none';
             tg.HapticFeedback.impactOccurred('medium');
 
-            // Сбрасываем позицию рулетки
             track.style.transition = 'none';
             track.style.transform = 'translateX(0px)';
             
-            // Перерисовываем предметы
             setupRoulette();
 
-            // Даем браузеру обновить стили перед анимацией
             setTimeout(() => {
-                // Определяем победный элемент (пусть это будет 35-й предмет в ленте)
-                const winIndex = 35;
+                const winIndex = 35; // Предмет, на котором остановится рулетка
                 const winItem = pool[Math.floor(Math.random() * pool.length)];
                 lastWonItem = winItem;
 
-                // Подменяем 35-ю карточку на наш настоящий выигрыш
                 const cards = track.getElementsByClassName('item-card');
                 cards[winIndex].style.borderBottom = `4px solid ${winItem[3]}`;
                 cards[winIndex].innerHTML = `
-                    <span class="item-emoji">${winItem[1]}</span>
+                    <img class="item-img" src="${winItem[1]}" alt="">
                     <span>${winItem[0]}</span>
                 `;
 
-                // Рассчитываем точное смещение, чтобы стрелка была по центру карточки
                 const wrapperWidth = document.querySelector('.roulette-wrapper').clientWidth;
                 const centerOffset = (wrapperWidth / 2) - (cardWidth / 2);
                 const targetX = -(winIndex * cardWidth) + centerOffset;
 
-                // Запускаем красивую плавную анимацию
                 track.style.transition = 'transform 4s cubic-bezier(0.1, 0.6, 0.1, 1)';
                 track.style.transform = `translateX(${targetX}px)`;
 
-                // Ожидаем окончания прокрутки
                 setTimeout(() => {
-                    // Вибрация в Telegram при остановке
                     tg.HapticFeedback.notificationOccurred('success');
                     
-                    // Показываем блок выигрыша
-                    document.getElementById('reward-emoji').innerText = winItem[1];
+                    // Обновляем окно выигрыша новой картинкой
+                    document.getElementById('reward-image').src = winItem[1];
                     document.getElementById('reward-name').innerText = winItem[0];
                     document.getElementById('reward-card').style.borderColor = winItem[3];
                     document.getElementById('sell-button-text').innerText = `Продать за ${winItem[2]} 🪙`;
@@ -394,20 +391,18 @@
             }, 50);
         }
 
-        // Действие: Оставить предмет себе
         function claimItem() {
             tg.HapticFeedback.impactOccurred('light');
-            alert(`Предмет ${lastWonItem[0]} добавлен в ваш инвентарь!`);
+            alert(`Предмет ${lastWonItem[0]} добавлен в инвентарь!`);
             rewardBlock.style.display = 'none';
         }
 
-        // Действие: Продать предмет и получить коины
         function sellItem() {
             if (!lastWonItem) return;
             balance += lastWonItem[2];
             updateBalanceDisplay();
             tg.HapticFeedback.notificationOccurred('success');
-            alert(`Вы успешно продали предмет за ${lastWonItem[2]} монет!`);
+            alert(`Предмет успешно продан за ${lastWonItem[2]} монет!`);
             rewardBlock.style.display = 'none';
             lastWonItem = null;
         }
@@ -416,8 +411,8 @@
             balanceDisplay.innerText = balance;
         }
 
-        // Запуск при старте
         setupRoulette();
     </script>
 </body>
 </html>
+
