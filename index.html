@@ -204,7 +204,8 @@
     const SUPABASE_URL = "https://nfqishqrigetyvnymzss.supabase.co"; 
     const SUPABASE_KEY = "ВСТАВЬ_СВОЙ_ANON_KEY_СЮДА"; 
     
-    const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // ИСПРАВЛЕНО: Избегаем конфликта имен с глобальным объектом window.supabase
+    const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
     let userId = "123456789"; 
     let username = "Gamer";
@@ -213,7 +214,6 @@
     let selectedCaseKey = null;
     let isRolling = false;
 
-    // ИСПРАВЛЕНО: Полностью проверенная и валидная структура данных
     const ITEMS = {
         '💖Сердце': {price: 15}, '🌹Роза': {price: 25}, '🚀Ракета': {price: 50}, '💐Цветы': {price: 50}, '🃏Шапка шута': {price: 500}, '🐶Снуп Догг': {price: 425}, '💍Кольцо': {price: 100}, '💎Алмаз': {price: 100}, '🍭Лол-поп': {price: 325},
         '🐍Лунная змея': {price: 350}, '📟Гаджет Тамы': {price: 450}, '☕Праздничный напиток': {price: 450}, '🔮Ведьмина шляпа': {price: 725}, '👁️Злой глаз': {price: 925}, '🧪Зелье любви': {price: 2075},
@@ -264,13 +264,19 @@
         }
         document.getElementById("username-display").innerText = "@" + username;
 
+        if (!supabaseClient) {
+            document.getElementById("username-display").innerText = "БД не настроена";
+            renderMenu();
+            return;
+        }
+
         try {
-            let { data, error } = await supabase.from('users').select('*').eq('id', userId).maybeSingle();
+            let { data, error } = await supabaseClient.from('users').select('*').eq('id', userId).maybeSingle();
             if (error) throw error;
 
             if (!data) {
                 const newUser = { id: userId, username: username, balance: 5000, inventory: {} };
-                await supabase.from('users').insert([newUser]);
+                await supabaseClient.from('users').insert([newUser]);
                 userBalance = 5000;
                 userInventory = {};
             } else {
@@ -281,6 +287,7 @@
             renderMenu();
         } catch (e) {
             document.getElementById("username-display").innerText = "Ошибка БД";
+            renderMenu();
         }
     }
 
@@ -402,12 +409,14 @@
         userInventory[winningItem] = (userInventory[winningItem] || 0) + 1;
         updateUI();
 
-        const { error } = await supabase.from('users').update({ balance: userBalance, inventory: userInventory }).eq('id', userId);
-        if (error) {
-            alert("Ошибка соединения с БД!");
-            isRolling = false;
-            document.getElementById("open-btn").disabled = false;
-            return;
+        if (supabaseClient) {
+            const { error } = await supabaseClient.from('users').update({ balance: userBalance, inventory: userInventory }).eq('id', userId);
+            if (error) {
+                alert("Ошибка соединения с БД!");
+                isRolling = false;
+                document.getElementById("open-btn").disabled = false;
+                return;
+            }
         }
 
         const track = document.getElementById("roulette-track");
