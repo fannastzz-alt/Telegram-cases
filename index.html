@@ -13,7 +13,7 @@
             background: #0f172a;
             color: #f8fafc;
             margin: 0;
-            padding: 12px 12px 75px 12px; /* Отступ снизу, чтобы контент не перекрывался меню */
+            padding: 12px 12px 75px 12px;
             overflow-x: hidden;
             user-select: none;
         }
@@ -33,11 +33,9 @@
 
         h2 { font-size: 1.25rem; margin: 16px 0 12px 0; color: #f1f5f9; text-align: center; }
 
-        /* Экраны-вкладки */
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* Сетка выбора кейсов */
         .case-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -67,7 +65,6 @@
             font-size: 0.9rem;
         }
 
-        /* Инвентарь как отдельный экран */
         .inventory-list {
             display: flex;
             flex-direction: column;
@@ -101,14 +98,12 @@
             font-weight: bold;
         }
 
-        /* Экран Заглушка */
         .coming-soon {
             text-align: center;
             padding: 40px 20px;
             color: #94a3b8;
         }
 
-        /* Кнопки управления */
         .btn {
             background: #3b82f6;
             color: white;
@@ -124,7 +119,6 @@
         .btn:disabled { background: #475569; color: #94a3b8; }
         .btn-secondary { background: #334155; width: auto; padding: 6px 14px; font-size: 0.85rem; margin: 0; float: left; }
 
-        /* НАСТОЯЩАЯ ПЛАВНАЯ РУЛЕТКА */
         .roulette-container {
             background: #1e293b;
             border: 2px solid #334155;
@@ -179,7 +173,6 @@
             width: 100%;
         }
 
-        /* Содержимое кейса */
         .loot-info-section { margin-top: 20px; text-align: left; }
         .loot-list { background: #1e293b; border-radius: 14px; padding: 8px; border: 1px solid #334155; }
         .loot-item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #334155; font-size: 0.85rem; }
@@ -189,7 +182,6 @@
         .loot-chance { color: #4ade80; font-weight: bold; font-size: 0.8rem; }
         .loot-price { color: #94a3b8; font-size: 0.75rem; }
 
-        /* ФИКСИРОВАННОЕ НИЖНЕЕ МЕНЮ (TAB BAR) */
         .tab-bar {
             position: fixed;
             bottom: 0;
@@ -199,7 +191,7 @@
             border-top: 1px solid #334155;
             display: flex;
             justify-content: space-around;
-            padding: 8px 0 calc(8px + env(safe-area-inset-bottom, 0px)) 0; /* Учитывает "челки" на iOS */
+            padding: 8px 0 calc(8px + env(safe-area-inset-bottom, 0px)) 0;
             z-index: 100;
             box-shadow: 0 -4px 12px rgba(0,0,0,0.4);
         }
@@ -221,7 +213,7 @@
             margin-bottom: 2px;
         }
         .tab-button.active {
-            color: #38bdf8; /* Голубой цвет активной вкладки */
+            color: #38bdf8;
         }
 
         .clearfix::after { content: ""; clear: both; display: table; }
@@ -230,7 +222,6 @@
 <body>
 
 <div class="container">
-    <!-- Шапка профиля остаётся видимой всегда -->
     <div class="header">
         <div id="username-display">Синхронизация...</div>
         <div class="balance">Баланс: <span id="balance-value">0</span> ⭐</div>
@@ -238,13 +229,11 @@
 
     <!-- ВКЛАДКА 1: КЕЙСЫ -->
     <div id="cases-tab" class="tab-content active">
-        <!-- Режим выбора кейса -->
         <div id="menu-screen">
             <h2>📦 Выберите кейс</h2>
             <div class="case-grid" id="case-grid-container"></div>
         </div>
 
-        <!-- Режим открытия кейса -->
         <div id="opening-screen" style="display: none;">
             <div class="clearfix" style="margin-bottom: 10px;">
                 <button class="btn btn-secondary" onclick="backToMenu()">↩️ Назад</button>
@@ -282,7 +271,6 @@
         </div>
     </div>
 
-    <!-- НИЖНЕЕ ФИКСИРОВАННОЕ МЕНЮ (TAB BAR) -->
     <nav class="tab-bar" id="bottom-tab-bar">
         <button class="tab-button active" onclick="switchTab('cases-tab')">
             <span class="tab-icon">📦</span>
@@ -332,7 +320,7 @@
         '🖤Значок сердца (черепашки)': {price: 12330325}, '🖤Плюшевый Пеп (Эмо-мальчик)': {price: 5036225}, '💜Значок сердца (ночной клуб)': {price: 607050}, '🧢Шапка Дурова (Тень)': {price: 225000}, '🖤Драгоценная персика (персик черный)': {price: 110725}, '👜Мешок для добычи (черный кошелек)': {price: 112050}, '🪖Героический шлем (Преторианский)': {price: 74025}, '🧱Ручной кирпич (бетон)': {price: 41250},
         '💍Bonded Ring (Leopard)': {price: 30325}, '🐸Kissed Frog (Sarutoad)': {price: 133200}, '🔑UFC Strike (Keychain Red)': {price: 237050}, '🎃Mad Pumpkin (Cucurbita)': {price: 360500}, '🌹Eternal Rose (Paper Bloom)': {price: 1075025}, '🦜Rare Bird (Amber Toucan)': {price: 3625000}
     };
-    
+
     const CASE_CONFIG = {
         'free': { name: "📦 Бесплатный кейс", cost: 0, items: [['💖Сердце', 60], ['🌹Роза', 17], ['🚀Ракета', 7], ['💐Цветы', 7], ['💍Кольцо', 3], ['💎Алмаз', 3], ['🍭Лол-поп', 1.5], ['🐶Снуп Догг', 1], ['🃏Шапка шута', 0.5]] },
         'poor': { name: "💼 Кейс \"Бедный\"", cost: 220, items: [['💎Алмаз', 21], ['💍Кольцо', 18.5], ['🍭Лол-поп', 16], ['🐍Лунная змея', 15], ['📟Гаджет Тамы', 12], ['☕Праздничный напиток', 10], ['🔮Ведьмина шляпа', 5], ['👁️Злой глаз', 2], ['🧪Зелье любви', 0.5]] },
@@ -357,27 +345,21 @@
         return num.toString();
     }
 
-    // СИСТЕМА ПЕРЕКЛЮЧЕНИЯ ВКЛАДОК
     function switchTab(tabId) {
-        if (isRolling) return; // Во время прокрутки рулетки вкладки блокируются
+        if (isRolling) return;
 
-        // Прячем все вкладки
         document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.remove('active');
         });
-        // Убираем синюю подсветку у всех кнопок меню
         document.querySelectorAll('.tab-button').forEach(btn => {
             btn.classList.remove('active');
         });
 
-        // Показываем нужную вкладку
         document.getElementById(tabId).classList.add('active');
         
-        // Подсвечиваем кнопку текущей вкладки в таббаре
         const btnIndex = tabId === 'cases-tab' ? 0 : tabId === 'inventory-tab' ? 1 : 2;
         document.getElementById('bottom-tab-bar').children[btnIndex].classList.add('active');
 
-        // Если перешли в инвентарь, сразу его обновляем
         if(tabId === 'inventory-tab') {
             renderInventory();
         }
@@ -517,7 +499,6 @@
         generateLootList(caseInfo.items);
         resetRoulette(caseInfo.items);
         
-        // Во время открытия кейса прячем таббар, чтобы игрок случайно не переключил вкладку посреди кручения
         document.getElementById("bottom-tab-bar").style.display = "none";
     }
 
@@ -527,7 +508,6 @@
         document.getElementById("opening-screen").style.display = "none";
         selectedCaseKey = null;
         
-        // Показываем таббар обратно при выходе в меню кейсов
         document.getElementById("bottom-tab-bar").style.display = "flex";
     }
 
