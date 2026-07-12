@@ -4,56 +4,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Мой Кейс-Бот</title>
-    <!-- Подключаем библиотеку Supabase -->
+    <!-- Библиотека Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { font-family: sans-serif; background: #1a1a1a; color: white; text-align: center; }
         #cases-container { display: flex; flex-direction: column; gap: 15px; padding: 20px; }
         .case-card { border: 1px solid #444; border-radius: 12px; padding: 20px; background: #2d2d2d; }
-        .error { color: #ff6b6b; padding: 20px; }
     </style>
 </head>
 <body>
 
     <h1>Кейсы</h1>
-    <div id="cases-container">Загрузка данных из базы...</div>
+    <div id="cases-container">Загрузка данных...</div>
 
     <script>
-        // --- ВСТАВЬ СЮДА СВОИ ДАННЫЕ (НЕ УДАЛЯЙ КАВЫЧКИ!) ---
+        // 1. КОНФИГУРАЦИЯ (ВСТАВЬ СЮДА СВОИ ДАННЫЕ)
         const SUPABASE_URL = 'https://nfqishqrigetyvnymzss.supabase.co/rest/v1/';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mcWlzaHFyaWdldHl2bnltenNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NDM2NzcsImV4cCI6MjA5OTQxOTY3N30.64PKwvKjD4YqpVPGtW43UZMI40bllVFpwUZy0ZAUVss';
-        // ---------------------------------------------------
+        const SUPABASE_KEY = 'sb_publishable_9y2KDUKbDFpRnnGKJA-udg_gZvu7fQk';
 
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // 2. ИНИЦИАЛИЗАЦИЯ (Используем supabaseClient, чтобы не конфликтовать с библиотекой)
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // 3. ФУНКЦИЯ ЗАГРУЗКИ
         async function loadCases() {
             const container = document.getElementById('cases-container');
             
             try {
-                // Запрос к таблице
-                const { data, error } = await supabase.from('cases').select('*');
+                // Обращаемся через supabaseClient
+                const { data, error } = await supabaseClient.from('cases').select('*');
                 
                 if (error) throw error;
                 
-                container.innerHTML = ''; // Очищаем "Загрузка..."
-                
+                if (!data || data.length === 0) {
+                    container.innerHTML = "В базе пока нет кейсов.";
+                    return;
+                }
+
+                container.innerHTML = '';
                 data.forEach(c => {
                     const card = document.createElement('div');
                     card.className = 'case-card';
                     card.innerHTML = `
                         <h3>${c.name}</h3>
                         <p>Стоимость: ${c.cost} 💰</p>
-                        <button onclick="alert('Открытие кейса ${c.id} в разработке!')">Открыть кейс</button>
+                        <button onclick="alert('Открытие ${c.id}')">Открыть</button>
                     `;
                     container.appendChild(card);
                 });
             } catch (err) {
-                container.innerHTML = `<div class="error">Ошибка: ${err.message}</div>`;
-                console.error("Ошибка при работе с Supabase:", err);
+                container.innerHTML = "Ошибка: " + err.message;
+                console.error("Ошибка:", err);
             }
         }
 
-        // Запуск функции
+        // Запуск
         loadCases();
     </script>
 </body>
