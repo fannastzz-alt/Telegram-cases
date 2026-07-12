@@ -122,9 +122,9 @@
     // ==========================================
     // НАСТРОЙКА SUPABASE (Вставь свои ключи!)
     // ==========================================
-    const SUPABASE_URL = "ТВОЙ_SUPABASE_URL";
-    const SUPABASE_KEY = "ТВОЙ_SUPABASE_ANON_KEY";
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const SUPABASE_URL = "https://nfqishqrigetyvnymzss.supabase.co/rest/v1/";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mcWlzaHFyaWdldHl2bnltenNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NDM2NzcsImV4cCI6MjA5OTQxOTY3N30.64PKwvKjD4YqpVPGtW43UZMI40bllVFpwUZy0ZAUVss";
+    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // Данные текущего игрока
     let userId = "123456789"; // Замени на динамическое получение через Telegram.WebApp.initDataUnsafe
