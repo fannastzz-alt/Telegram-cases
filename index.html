@@ -2,325 +2,53 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Stars Case Opener</title>
-    <!-- Подключаем CDN Supabase -->
+    <title>Мой Кейс-Бот</title>
+    <!-- Подключаем библиотеку Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: #0f172a;
-            color: #f8fafc;
-            margin: 0;
-            padding: 20px;
-            text-align: center;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .header {
-            background: #1e293b;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-        }
-        h1, h2, h3 { margin: 10px 0; }
-        .balance { color: #eab308; font-weight: bold; font-size: 1.2rem; }
-        
-        /* Сетка выбора кейсов */
-        .case-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        .case-card {
-            background: #1e293b;
-            border: 2px solid #334155;
-            border-radius: 16px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .case-card:hover {
-            transform: translateY(-2px);
-            border-color: #3b82f6;
-        }
-        .case-cost {
-            color: #38bdf8;
-            font-weight: bold;
-            margin-top: 8px;
-        }
-
-        /* Экран открытия */
-        .btn {
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            margin: 10px;
-            font-weight: bold;
-        }
-        .btn:hover { background: #2563eb; }
-        .btn-secondary { background: #475569; }
-        .btn-secondary:hover { background: #334155; }
-
-        /* Простая анимация рулетки */
-        .roulette-wrapper {
-            background: #1e293b;
-            padding: 30px;
-            border-radius: 16px;
-            margin: 20px 0;
-            border: 2px dashed #475569;
-            min-height: 150px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .drop-title { font-size: 1.5rem; font-weight: bold; margin-top: 10px; color: #4ade80; }
-        .drop-price { color: #94a3b8; margin-top: 5px; }
+        #cases-container { display: grid; gap: 10px; padding: 20px; }
+        .case-card { border: 2px solid #444; border-radius: 10px; padding: 15px; text-align: center; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <div id="username-display">Загрузка игрока...</div>
-        <div class="balance">Баланс: <span id="balance-value">0</span> ⭐</div>
-    </div>
+    <h1>Кейсы</h1>
+    <div id="cases-container">Загрузка...</div>
 
-    <!-- 1. ЭКРАН ВЫБОРА КЕЙСОВ -->
-    <div id="menu-screen">
-        <h2>📦 Выберите кейс</h2>
-        <div class="case-grid" id="case-grid-container"></div>
-    </div>
+    <script>
+        // 1. Инициализация (Вставь сюда свои данные из Supabase Settings -> API)
+        const SUPABASE_URL = 'ТВОЙ_URL_ЗДЕСЬ';
+        const SUPABASE_KEY = 'ТВОЙ_ANON_KEY_ЗДЕСЬ';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    <!-- 2. ЭКРАН РУЛЕТКИ -->
-    <div id="opening-screen" style="display: none;">
-        <button class="btn btn-secondary" onclick="backToMenu()">↩️ В магазин</button>
-        <h2 id="current-case-name">Название кейса</h2>
-        
-        <div class="roulette-wrapper">
-            <div id="roulette-status">Нажмите кнопку, чтобы открыть кейс</div>
-            <div id="drop-result" style="display: none;">
-                <div class="drop-title" id="drop-name">Item</div>
-                <div class="drop-price" id="drop-price">0 ⭐</div>
-            </div>
-        </div>
-        
-        <button class="btn" id="open-btn" onclick="triggerOpenCase()">Открыть кейс</button>
-    </div>
-</div>
-
-<script>
-    // ==========================================
-    // НАСТРОЙКА SUPABASE (Вставь свои ключи!)
-    // ==========================================
-    const SUPABASE_URL = "https://nfqishqrigetyvnymzss.supabase.co/rest/v1/";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mcWlzaHFyaWdldHl2bnltenNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NDM2NzcsImV4cCI6MjA5OTQxOTY3N30.64PKwvKjD4YqpVPGtW43UZMI40bllVFpwUZy0ZAUVss";
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    // Данные текущего игрока
-    let userId = "123456789"; // Замени на динамическое получение через Telegram.WebApp.initDataUnsafe
-    let username = "Gamer";
-    let userBalance = 0;
-    let userInventory = {};
-    let selectedCaseKey = null;
-
-    // ==========================================
-    // ПОЛНАЯ ДАТАБАЗА ПРЕДМЕТОВ И ЦЕН
-    // ==========================================
-    const ITEMS = {
-        '💖Сердце': {price: 15}, '🌹Роза': {price: 25}, '🚀Ракета': {price: 50}, '💐Цветы': {price: 50}, '🃏Шапка шута': {price: 500}, '🐶Снуп Догг': {price: 425}, '💍Кольцо': {price: 100}, '💎Алмаз': {price: 100}, '🍭Лол-поп': {price: 325},
-        '🐍Лунная змея': {price: 350}, '📟Гаджет Тамы': {price: 450}, '☕Праздничный напиток': {price: 450}, '🔮Ведьмина шляпа': {price: 725}, '👁️Злой глаз': {price: 925}, '🧪Зелье любви': {price: 2075},
-        '🎁Змейная коробка': {price: 325}, '🧦Носок Xmax': {price: 350}, '🍪Печенье Гигнера': {price: 450}, '🐍Змейка для питомцев': {price: 450}, '🧪Зловечный яд': {price: 700}, '🌸Цветок сакуры': {price: 1075}, '⭐Висящая звезда': {price: 1225}, '🌹Вечная роза': {price: 3325}, '🐸Поцелованная Лягушка': {price: 8625}, '🍾Бутылка духов': {price: 17350},
-        '🍦Мороженое Вайс': {price: 325}, '🍧Летнее мороженое': {price: 475}, '🦆Надувной круг Утка': {price: 600}, '🏄Доска для серфинга': {price: 725}, '🍭Гипно-леденец': {price: 900}, '🚬Винтажная сигара': {price: 1175}, '🍄Мухомор-шпион': {price: 2075}, '💨Ионный фен': {price: 3725}, '🐍Тропическая змея': {price: 10500}, '🐒Веселая шимпанзе': {price: 19375}, '🐠Набор Аквариум': {price: 30250},
-        '🕵️Снуп Догг (Дабл Джи)': {price: 480}, '🎩Цилиндр (Клокверк)': {price: 680}, '🦋Галстук-бабочка (Классический)': {price: 1150}, '💂Папаха (К)': {price: 1430}, '🕯️Свеча (Чёрная)': {price: 2350}, '🚗Лоурайдер (Л.А. Нуар)': {price: 14800}, '🧪Духи (Алый Поцелуй)': {price: 19500},
-        '💐Роскошный букет': {price: 650}, '🐰Мармеладный зайчик': {price: 800}, '🎃Безумная тыква': {price: 3500}, '💨Ионный сушильник': {price: 3850}, '🐱Шлем неко': {price: 5750}, '💎Драгоценный значок': {price: 14775}, '🪖Героический шлем': {price: 48625},
-        '🕯️Вечная свеча (пузырьковая ванна)': {price: 1775}, '💙Купидонский амулет (кристально чистый)': {price: 3375}, '🧪Зелье любви (Ледяная королева)': {price: 2550}, '🥶Безумная тыква (Обморожение)': {price: 6025}, '🐸Поцелованная Лягушка (Эктолягушка)': {price: 10500}, '💎Астральный осколок (Аквариум)': {price: 28950}, '🍑Драгоценная персика (пузырьчато-синий)': {price: 202750},
-        '🐱Испуганный кот (Ментос)': {price: 374025}, '🪖Героический шлем (Робенгуда)': {price: 261750}, '🤟Знак Вестсайда (Сапфир)': {price: 105275}, '🛍️Сумка с добычей (Синий Версо)': {price: 74750}, '🐒Весёлый шимпанзе (Кристалл)': {price: 37050}, '🔥Прохладное пламя (Космический корабль)': {price: 21075}, '🧦Свежие носки (Основание)': {price: 13750}, '🍪Счастливое брауни (Печеньковый монстр)': {price: 8350}, '🔑Клавиша ввода (Телеграм)': {price: 6025}, '🧤Снежные рукавицы (Розовые манжеты)': {price: 4465},
-        '🐸Плюшевый Пеп (ядовитый дротик)': {price: 1205075}, '💖Астральный Кристал(Розовый)': {price: 637025}, '🧢Шапка Дурова (Веселое время)': {price: 232775}, '💵Ручной кирпич (денежный ролл)': {price: 102050}, '🧞Lampa джинния (дух кошки)': {price: 82050}, '🌙Нежный браслет (Лунный кот)': {price: 74725}, '🐈‍⬛Напуганный кот (Обелиск)': {price: 61125}, '🔮Нежный браслет (для кошек)': {price: 52500}, '🥷Собака сопротивления': {price: 36250}, '🐱Прикованное кольцо (кошачья кровать)': {price: 22725}, '💍Драгоценный значок (старая бронза)': {price: 18250},
-        '🖤Значок сердца (черепашки)': {price: 12330325}, '🖤Плюшевый Пеп (Эмо-мальчик)': {price: 5036225}, '💜Значок сердца (ночной клуб)': {price: 607050}, '🧢Шапка Дурова (Тень)': {price: 225000}, '🖤Драгоценная персика (персик черный)': {price: 110725}, '👜Мешок для добычи (черный кошелек)': {price: 112050}, '🪖Героический шлем (Преторианский)': {price: 74025}, '🧱Ручной кирпич (бетон)': {price: 41250},
-        '💍Bonded Ring (Leopard)': {price: 30325}, '🐸Kissed Frog (Sarutoad)': {price: 133200}, '🔑UFC Strike (Keychain Red)': {price: 237050}, '🎃Mad Pumpkin (Cucurbita)': {price: 360500}, '🌹Eternal Rose (Paper Bloom)': {price: 1075025}, '🦜Rare Bird (Amber Toucan)': {price: 3625000}
-    };
-
-    // ==========================================
-    // КОНФИГУРАЦИЯ КЕЙСОВ И ТОЧНЫЕ ВЕСА (ШАНСЫ)
-    // ==========================================
-    const CASE_CONFIG = {
-        'free': { name: "📦 Бесплатный кейс", cost: 0, items: [['💖Сердце', 60], ['🌹Роза', 17], ['🚀Ракета', 7], ['💐Цветы', 7], ['💍Кольцо', 3], ['💎Алмаз', 3], ['🍭Лол-поп', 1.5], ['🐶Снуп Догг', 1], ['🃏Шапка шута', 0.5]] },
-        'poor': { name: "💼 Кейс \"Бедный\"", cost: 220, items: [['💎Алмаз', 21], ['💍Кольцо', 18.5], ['🍭Лол-поп', 16], ['🐍Лунная змея', 15], ['📟Гаджет Тамы', 12], ['☕Праздничный напиток', 10], ['🔮Ведьмина шляпа', 5], ['👁️Злой глаз', 2], ['🧪Зелье любви', 0.5]] },
-        'winter': { name: "❄️ Зимний кейс", cost: 444, items: [['💍Кольцо', 36.3], ['🎁Змейная коробка', 15], ['🧦Носок Xmax', 12], ['🍪Печенье Гигнера', 8], ['🐍Змейка для питомцев', 8], ['🧪Зловечный яд', 7], ['🌸Цветок сакуры', 6], ['⭐Висящая звезда', 4], ['🌹Вечная роза', 3], ['🐸Поцелованная Лягушка', 0.6], ['🍾Бутылка духов', 0.1]] },
-        'summer': { name: "☀️ Летний кейс", cost: 689, items: [['🍦Мороженое Вайс', 43.4], ['🍧Летнее мороженое', 12], ['🦆Надувной круг Утка', 12], ['🏄Доска для серфинга', 10], ['🍭Гипно-леденец', 8], ['🚬Винтажная сигара', 5], ['🍄Мухомор-шпион', 5], ['💨Ионный фен', 4], ['🐍Тропическая змея', 0.5], ['🐒Веселая шимпанзе', 0.09], ['🐠Набор Аквариум', 0.01]] },
-        'prokuror': { name: "⚖️ Кейс \"Прокурор\"", cost: 840, items: [['🕵️Снуп Догг (Дабл Джи)', 39], ['🎩Цилиндр (Клокверк)', 20], ['🦋Галстук-бабочка (Классический)', 9], ['💂Папаха (К)', 7], ['🕯️Свеча (Чёрная)', 4], ['🚗Лоурайдер (Л.А. Нуар)', 0.7], ['🧪Духи (Алый Поцелуй)', 0.3]] },
-        'rich': { name: "💰 Кейс \"Богач\"", cost: 1364, items: [['💐Роскошный букет', 35], ['🐰Мармеладный зайчик', 25], ['👁️Злой глаз', 21], ['🎃Безумная тыква', 9], ['💨Ионный сушильник', 5], ['🐱Шлем неко', 4], ['💎Драгоценный значок', 0.85], ['🪖Героический шлем', 0.15]] },
-        'fr_ht': { name: "💙 Кейс \"Замороженное Сердце\"", cost: 4500, items: [['🕯️Вечная свеча (пузырьковая ванна)', 45.8], ['💙Купидонский амулет (кристально чистый)', 23], ['🧪Зелье любви (Ледяная королева)', 15], ['🥶Безумная тыква (Обморожение)', 10], ['🐸Поцелованная Лягушка (Эктолягушка)', 4], ['💎Астральный осколок (Аквариум)', 1.6], ['🍑Драгоценная персика (пузырьчато-синий)', 0.6]] },
-        'mouth': { name: "🧼 Кейс \"Полость для пености рта\"", cost: 12000, items: [['🐱Испуганный кот (Ментос)', 0.25], ['🪖Героический шлем (Робенгуда)', 0.35], ['🤟Знак Вестсайда (Сапфир)', 1.0], ['🛍️Сумка с добычей (Синий Версо)', 1.5], ['🐒Весёлый шимпанзе (Кристалл)', 3.0], ['🔥Прохладное пламя (Космический корабль)', 5.0], ['🧦Свежие носки (Основание)', 8.0], ['🍪Счастливое брауни (Печеньковый монстр)', 17.0], ['🔑Клавиша ввода (Телеграм)', 25.9], ['🧤Снежные рукавицы (Розовые манжеты)', 38.0]] },
-        'cats': { name: "🐱 Кейс \"Кошки\"", cost: 40000, items: [['🐸Плюшевый Пеп (ядовитый дротик)', 0.1], ['💖Астральный Кристал(Розовый)', 0.3], ['🧢Шапка Дурова (Веселое время)', 0.7], ['💵Ручной кирпич (денежный ролл)', 1.5], ['🧞Lampa джинния (дух кошки)', 2.2], ['🌙Нежный браслет (Лунный кот)', 4.0], ['🐈‍⬛Напуганный кот (Обелиск)', 6.0], ['🔮Нежный браслет (для кошек)', 9.5], ['🥷Собака сопротивления', 13.0], ['🐱Прикованное кольцо (кошачья кровать)', 24.7], ['💍Драгоценный значок (старая бронза)', 38.0]] },
-        'nft_battle': { name: "✔️ Кейс \"Подтверждение\"", cost: 135000, items: [['🖤Значок сердца (черепашки)', 0.1], ['🖤Плюшевый Пеп (Эмо-мальчик)', 0.3], ['💜Значок сердца (ночной клуб)', 2.0], ['🧢Шапка Дурова (Тень)', 5.0], ['🖤Драгоценная персика (персик черный)', 20.0], ['👜Мешок для добычи (черный кошелек)', 20.0], ['🪖Героический шлем (Преторианский)', 22.6], ['🧱Ручной кирпич (бетон)', 30.0]] },
-        'wish_case': { name: "✨ Кейс \"Желание\"", cost: 250000, items: [['💍Bonded Ring (Leopard)', 43.0], ['🐸Kissed Frog (Sarutoad)', 35.0], ['🔑UFC Strike (Keychain Red)', 10.5], ['🎃Mad Pumpkin (Cucurbita)', 7.0], ['🌹Eternal Rose (Paper Bloom)', 3.0], ['🦜Rare Bird (Amber Toucan)', 1.5]] }
-    };
-
-    // Форматирование больших чисел
-    function formatStars(num) {
-        if (!num) return "0";
-        let absNum = Math.abs(num);
-        if (absNum >= 1e12) return (num / 1e12).toFixed(2).replace(/\.?0+$/, '') + "Т";
-        if (absNum >= 1e9) return (num / 1e9).toFixed(2).replace(/\.?0+$/, '') + "Б";
-        if (absNum >= 1e6) return (num / 1e6).toFixed(2).replace(/\.?0+$/, '') + "М";
-        if (absNum >= 1e3) return (num / 1e3).toFixed(2).replace(/\.?0+$/, '') + "к";
-        return num.toString();
-    }
-
-    // Инициализация игрока из базы
-    async function loadUserData() {
-        // Пытаемся получить данные из Telegram Mini App
-        if (window.Telegram && window.Telegram.WebApp) {
-            const tgData = window.Telegram.WebApp.initDataUnsafe;
-            if (tgData && tgData.user) {
-                userId = tgData.user.id.toString();
-                username = tgData.user.username || tgData.user.first_name;
-            }
-        }
-
-        document.getElementById("username-display").innerText = "@" + username;
-
-        // Читаем Supabase
-        let { data, error } = await supabase.from('users').select('*').eq('id', userId).single();
-
-        if (error && error.code === 'PGRST116') {
-            // Игрок новый, регистрируем с балансом 5000 для старта
-            const newUser = { id: userId, username: username, balance: 5000, inventory: {} };
-            await supabase.from('users').insert([newUser]);
-            userBalance = newUser.balance;
-            userInventory = newUser.inventory;
-        } else if (data) {
-            userBalance = data.balance || 0;
-            userInventory = data.inventory || {};
-        }
-
-        updateUI();
-    }
-
-    function updateUI() {
-        document.getElementById("balance-value").innerText = formatStars(userBalance);
-    }
-
-    // Рендер сетки меню кейсов
-    function renderMenu() {
-        const container = document.getElementById("case-grid-container");
-        container.innerHTML = "";
-
-        Object.keys(CASE_CONFIG).forEach(key => {
-            const caseInfo = CASE_CONFIG[key];
-            const card = document.createElement("div");
-            card.className = "case-card";
-            card.innerHTML = `
-                <h3>${caseInfo.name}</h3>
-                <div class="case-cost">${caseInfo.cost > 0 ? formatStars(caseInfo.cost) + " ⭐" : "Бесплатно"}</div>
-            `;
-            card.onclick = () => openCaseScreen(key);
-            container.appendChild(card);
-        });
-    }
-
-    function openCaseScreen(key) {
-        selectedCaseKey = key;
-        const caseInfo = CASE_CONFIG[key];
-        
-        document.getElementById("menu-screen").style.display = "none";
-        document.getElementById("opening-screen").style.display = "block";
-        document.getElementById("current-case-name").innerText = caseInfo.name;
-        
-        // Сброс рулетки
-        document.getElementById("roulette-status").style.display = "block";
-        document.getElementById("roulette-status").innerText = `Стоимость открытия: ${caseInfo.cost} ⭐`;
-        document.getElementById("drop-result").style.display = "none";
-        document.getElementById("open-btn").disabled = false;
-    }
-
-    function backToMenu() {
-        document.getElementById("menu-screen").style.display = "block";
-        document.getElementById("opening-screen").style.display = "none";
-        selectedCaseKey = null;
-    }
-
-    // Алгоритм симуляции выпадения предмета на основе весов
-    function getRandomItem(itemsArray) {
-        let totalWeight = itemsArray.reduce((sum, item) => sum + item[1], 0);
-        let randomNum = Math.random() * totalWeight;
-        
-        for (let i = 0; i < itemsArray.length; i++) {
-            if (randomNum < itemsArray[i][1]) {
-                return itemsArray[i][0];
-            }
-            randomNum -= itemsArray[i][1];
-        }
-        return itemsArray[0][0];
-    }
-
-    // Логика открытия кейса
-    async function triggerOpenCase() {
-        if (!selectedCaseKey) return;
-        
-        const caseInfo = CASE_CONFIG[selectedCaseKey];
-        
-        if (userBalance < caseInfo.cost) {
-            alert("Недостаточно звёзд для открытия этого кейса!");
-            return;
-        }
-
-        document.getElementById("open-btn").disabled = true;
-        document.getElementById("roulette-status").innerText = "🎰 Крутим рулетку...";
-
-        // 1. Вычисляем дроп
-        const droppedItemName = getRandomItem(caseInfo.items);
-        const itemPrice = ITEMS[droppedItemName].price;
-
-        // 2. Списываем баланс и обновляем инвентарь
-        userBalance -= caseInfo.cost;
-        userInventory[droppedItemName] = (userInventory[droppedItemName] || 0) + 1;
-
-        // 3. Отправляем апдейт в Supabase
-        const { error } = await supabase
-            .from('users')
-            .update({ balance: userBalance, inventory: userInventory })
-            .eq('id', userId);
-
-        if (error) {
-            console.error("Ошибка сохранения в базу данных:", error);
-            alert("Ошибка сохранения: " + error.message);
-            document.getElementById("open-btn").disabled = false;
-            return;
-        }
-
-        // Обновляем визуальный баланс
-        updateUI();
-
-        // Имитируем задержку анимации (1 секунда)
-        setTimeout(() => {
-            document.getElementById("roulette-status").style.display = "none";
+        // 2. Функция загрузки кейсов
+        async function loadCases() {
+            const container = document.getElementById('cases-container');
             
-            document.getElementById("drop-name").innerText = droppedItemName;
-            document.getElementById("drop-price").innerText = `Ценность: ${formatStars(itemPrice)} ⭐`;
-            document.getElementById("drop-result").style.display = "block";
-            
-            document.getElementById("open-btn").disabled = false;
-        }, 1000);
-    }
+            const { data: cases, error } = await supabase
+                .from('cases')
+                .select('*');
 
-    // Старт
-    window.onload = async () => {
-        await loadUserData();
-        renderMenu();
-    };
-</script>
+            if (error) {
+                container.innerHTML = "Ошибка загрузки: " + error.message;
+                return;
+            }
+
+            container.innerHTML = '';
+            cases.forEach(c => {
+                const card = document.createElement('div');
+                card.className = 'case-card';
+                card.innerHTML = `
+                    <h3>${c.name}</h3>
+                    <p>Стоимость: ${c.cost} 💰</p>
+                    <button onclick="alert('Открываем ${c.id}')">Открыть</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Запуск
+        loadCases();
+    </script>
 </body>
 </html>
-
