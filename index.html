@@ -308,11 +308,11 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Исправленная инициализация через встроенный конструктор UMD
+        // Конфигурация подключения к Supabase с правильным токеном
         const SUPABASE_URL = "https://nfqishqrigetyvnymzss.supabase.co";
-        const SUPABASE_KEY = "Sb_publishable_9y2KDUKbDFpRnnGKJA-udg_gZvu7fQk";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mcWlzaHFyaWdldHl2bnltenNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NDM2NzcsImV4cCI6MjA5OTQxOTY3N30.64PKwvKjD4YqpVPGtW43UZMI40bllVFpwUZy0ZAUVss";
         
-        // Создаем подключение строго по правилам v2 библиотеки
+        // Создаем подключение через UMD клиент библиотеки v2
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let userId = "demo_user"; 
@@ -374,7 +374,7 @@
             }
         }
 
-        // Сохранение баланса и инвентаря
+        // Сохранение баланса и инвентаня
         async function saveUserData() {
             try {
                 await supabase
@@ -521,3 +521,4 @@
     </script>
 </body>
 </html>
+
