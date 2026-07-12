@@ -321,15 +321,7 @@
         };
         
         firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
 
-        let userId = "demo_user"; 
-        let firstName = "Игрок";
-
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            userId = tg.initDataUnsafe.user.id.toString();
-            firstName = tg.initDataUnsafe.user.first_name;
-        }
         document.getElementById('username').innerText = firstName;
 
         let balance = 1000;
