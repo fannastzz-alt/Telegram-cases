@@ -204,8 +204,11 @@
     const SUPABASE_URL = "https://nfqishqrigetyvnymzss.supabase.co"; 
     const SUPABASE_KEY = "ВСТАВЬ_СВОЙ_ANON_KEY_СЮДА"; 
     
-    // ИСПРАВЛЕНО: Избегаем конфликта имен с глобальным объектом window.supabase
-    const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+    // ИСПРАВЛЕНО НАКОНЕЦ-ТО: dbClient вместо названия supabase, чтобы избежать конфликта с библиотекой
+    let dbClient = null;
+    if (window.supabase && typeof window.supabase.createClient === 'function') {
+        dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    }
 
     let userId = "123456789"; 
     let username = "Gamer";
@@ -264,19 +267,21 @@
         }
         document.getElementById("username-display").innerText = "@" + username;
 
-        if (!supabaseClient) {
-            document.getElementById("username-display").innerText = "БД не настроена";
+        if (!dbClient) {
+            document.getElementById("username-display").innerText = "Автономный режим (Нет БД)";
+            userBalance = 5000; 
+            updateUI();
             renderMenu();
             return;
         }
 
         try {
-            let { data, error } = await supabaseClient.from('users').select('*').eq('id', userId).maybeSingle();
+            let { data, error } = await dbClient.from('users').select('*').eq('id', userId).maybeSingle();
             if (error) throw error;
 
             if (!data) {
                 const newUser = { id: userId, username: username, balance: 5000, inventory: {} };
-                await supabaseClient.from('users').insert([newUser]);
+                await dbClient.from('users').insert([newUser]);
                 userBalance = 5000;
                 userInventory = {};
             } else {
@@ -286,7 +291,7 @@
             updateUI();
             renderMenu();
         } catch (e) {
-            document.getElementById("username-display").innerText = "Ошибка БД";
+            document.getElementById("username-display").innerText = "Ошибка загрузки БД";
             renderMenu();
         }
     }
@@ -409,10 +414,10 @@
         userInventory[winningItem] = (userInventory[winningItem] || 0) + 1;
         updateUI();
 
-        if (supabaseClient) {
-            const { error } = await supabaseClient.from('users').update({ balance: userBalance, inventory: userInventory }).eq('id', userId);
+        if (dbClient) {
+            const { error } = await dbClient.from('users').update({ balance: userBalance, inventory: userInventory }).eq('id', userId);
             if (error) {
-                alert("Ошибка соединения с БД!");
+                alert("Ошибка синхронизации с базой!");
                 isRolling = false;
                 document.getElementById("open-btn").disabled = false;
                 return;
