@@ -203,7 +203,9 @@
     const SUPABASE_URL = "https://nfqishqrigetyvnymzss.supabase.co"; 
     const SUPABASE_KEY = "sb_publishable_9y2KDUKbDFpRnnGKJA-udg_gZvu7fQk"; 
     
-    const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // Просто удали слово 'const' перед вторым supabase, если оно там дублировалось.
+// Вот идеальная и безопасная строчка:
+const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let userId = "123456789"; 
     let username = "Gamer";
