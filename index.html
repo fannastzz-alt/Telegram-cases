@@ -28,9 +28,10 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
+            padding: 20px 20px 90px 20px; /* Отступ снизу для меню навигации */
         }
 
+        /* Верхняя панель */
         .header-panel {
             width: 100%;
             max-width: 400px;
@@ -70,9 +71,19 @@
             font-size: 16px;
         }
 
-        .case-container {
+        /* Экраны (Вкладки) */
+        .page-screen {
+            display: none;
             width: 100%;
             max-width: 400px;
+        }
+
+        .page-screen.active {
+            display: block;
+        }
+
+        /* Контейнер кейса */
+        .case-container {
             background: #2c2c2e;
             border-radius: 16px;
             padding: 20px;
@@ -168,15 +179,20 @@
             box-shadow: none;
         }
 
+        /* Окно выигрыша рулетки */
         .reward-panel {
             display: none;
-            width: 100%;
-            max-width: 400px;
             background: #2c2c2e;
             border-radius: 16px;
             padding: 20px;
             text-align: center;
             box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .reward-title {
@@ -221,6 +237,7 @@
             font-weight: 600;
             border-radius: 10px;
             border: none;
+            cursor: pointer;
         }
 
         .keep-btn {
@@ -233,8 +250,96 @@
             color: #ffd60a;
             border: 1px solid #ffd60a;
         }
+
+        /* СЕТКА ИНВЕНТАРЯ */
+        .inventory-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            width: 100%;
+        }
+
+        .inventory-item {
+            background: #2c2c2e;
+            border-radius: 12px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            border-bottom: 4px solid #3a3a3c;
+        }
+
+        .inventory-item img {
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
+            margin-bottom: 6px;
+        }
+
+        .inventory-item .item-price {
+            color: #ffd60a;
+            font-size: 10px;
+            margin-top: 2px;
+        }
+
+        .empty-text {
+            grid-column: span 3;
+            color: #aeaeb2;
+            font-size: 14px;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        /* НИЖНЕЕ МЕНЮ НАВИГАЦИИ (ТАББАР) */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: #2c2c2e;
+            border-top: 1px solid #3a3a3c;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 900;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #8e8e93;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 45%;
+            height: 100%;
+        }
+
+        .nav-item.active {
+            color: #0a84ff;
+        }
+
+        .nav-icon {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
         
-        /* Загрузочный экран пока база данных не ответит */
+        /* Загрузочный экран */
         #loading-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -253,6 +358,7 @@
 
     <div id="loading-overlay">Синхронизация с базой данных...</div>
 
+    <!-- Верхняя панель игрока -->
     <div class="header-panel">
         <div class="user-info">Привет, <span id="username">Игрок</span>!</div>
         <div class="balance-box">
@@ -261,27 +367,50 @@
         </div>
     </div>
 
-    <div class="case-container" id="case-block">
-        <h1>Кейс "Желание"</h1>
-        <div class="price-tag">Стоимость открытия: 150 🪙</div>
+    <!-- ЭКРАН 1: КЕЙСЫ -->
+    <div id="screen-cases" class="page-screen active">
+        <div class="case-container" id="case-block">
+            <h1>Кейс "Желание"</h1>
+            <div class="price-tag">Стоимость открытия: 150 🪙</div>
 
-        <div class="roulette-wrapper">
-            <div class="pointer"></div>
-            <div class="roulette-inner" id="roulette-track"></div>
+            <div class="roulette-wrapper">
+                <div class="pointer"></div>
+                <div class="roulette-inner" id="roulette-track"></div>
+            </div>
+
+            <button class="action-btn" id="spin-button" onclick="startSpin()" disabled>Загрузка...</button>
         </div>
 
-        <button class="action-btn" id="spin-button" onclick="startSpin()" disabled>Загрузка...</button>
+        <div class="reward-panel" id="reward-block">
+            <div class="reward-title">🎉 Поздравляем! Ваш выигрыш:</div>
+            <div class="reward-item" id="reward-card">
+                <img class="reward-img" id="reward-image" src="" alt="выигрыш">
+                <span class="reward-name" id="reward-name">Предмет</span>
+            </div>
+            <div class="choice-buttons">
+                <button class="choice-btn keep-btn" onclick="claimItem()">В инвентарь</button>
+                <button class="choice-btn sell-btn" id="sell-button-text" onclick="sellItem()">Продать</button>
+            </div>
+        </div>
     </div>
 
-    <div class="reward-panel" id="reward-block">
-        <div class="reward-title">🎉 Поздравляем! Ваш выигрыш:</div>
-        <div class="reward-item" id="reward-card">
-            <img class="reward-img" id="reward-image" src="" alt="выигрыш">
-            <span class="reward-name" id="reward-name">Предмет</span>
+    <!-- ЭКРАН 2: ИНВЕНТАРЬ -->
+    <div id="screen-inventory" class="page-screen">
+        <div class="inventory-title">Ваш инвентарь</div>
+        <div class="inventory-grid" id="inventory-container">
+            <div class="empty-text">У вас пока нет предметов. Крутите кейсы!</div>
         </div>
-        <div class="choice-buttons">
-            <button class="choice-btn keep-btn" onclick="claimItem()">В инвентарь</button>
-            <button class="choice-btn sell-btn" id="sell-button-text" onclick="sellItem()">Продать</button>
+    </div>
+
+    <!-- НИЖНЕЕ МЕНЮ НАВИГАЦИИ -->
+    <div class="nav-bar">
+        <div class="nav-item active" id="nav-btn-cases" onclick="switchPage('cases')">
+            <div class="nav-icon">📦</div>
+            <div>Кейсы</div>
+        </div>
+        <div class="nav-item" id="nav-btn-inventory" onclick="switchPage('inventory')">
+            <div class="nav-icon">🎒</div>
+            <div>Инвентарь</div>
         </div>
     </div>
 
@@ -289,7 +418,7 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // 1. Инициализация Firebase с твоими ключами
+        // Конфигурация Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDi-fArNcqqttIJYyvWvzF_h1PtdMykGOA",
             authDomain: "telegramcasesimulator.firebaseapp.com",
@@ -303,7 +432,6 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // 2. Определяем Telegram ID пользователя
         let userId = "demo_user"; 
         let firstName = "Игрок";
 
@@ -314,6 +442,7 @@
         document.getElementById('username').innerText = firstName;
 
         let balance = 0;
+        let inventory = []; // Сюда подгружаются предметы из базы: {id, name, img, price, color}
         const spinCost = 150;
         let lastWonItem = null;
 
@@ -331,33 +460,96 @@
         const spinBtn = document.getElementById('spin-button');
         const rewardBlock = document.getElementById('reward-block');
         const balanceDisplay = document.getElementById('balance-display');
+        const inventoryContainer = document.getElementById('inventory-container');
         const cardWidth = 90;
 
-        // 3. Подгружаем баланс из Firebase
+        // Синхронизация данных пользователя с Firebase
         const userRef = database.ref('users/' + userId);
         userRef.on('value', (snapshot) => {
             const data = snapshot.val();
-            if (data && data.balance !== undefined) {
-                balance = data.balance;
+            if (data) {
+                balance = data.balance !== undefined ? data.balance : 1000;
+                
+                // Обрабатываем инвентарь из Firebase
+                if (data.inventory) {
+                    // Firebase может отдавать объект, превращаем его в массив
+                    inventory = Object.keys(data.inventory).map(key => ({
+                        firebaseId: key,
+                        ...data.inventory[key]
+                    }));
+                } else {
+                    inventory = [];
+                }
             } else {
-                // Если пользователя еще нет в базе, создаем его профиль
                 balance = 1000;
+                inventory = [];
                 userRef.set({
                     username: firstName,
-                    balance: balance
+                    balance: balance,
+                    inventory: {}
                 });
             }
-            balanceDisplay.innerText = balance;
             
-            // Убираем загрузочный экран и активируем кнопку
+            balanceDisplay.innerText = balance;
+            renderInventory();
+            
             document.getElementById('loading-overlay').style.display = 'none';
             spinBtn.disabled = false;
-            spinBtn.innerText = "Испытать удачу";
+            if (spinBtn.innerText === "Загрузка...") {
+                spinBtn.innerText = "Испытать удачу";
+            }
         });
 
-        // Функция синхронизации баланса с Firebase
         function updateFirebaseBalance() {
             userRef.update({ balance: balance });
+        }
+
+        // Переключение экранов (Кейсы / Инвентарь)
+        function switchPage(page) {
+            tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('screen-cases').classList.remove('active');
+            document.getElementById('screen-inventory').classList.remove('active');
+            document.getElementById('nav-btn-cases').classList.remove('active');
+            document.getElementById('nav-btn-inventory').classList.remove('active');
+
+            if (page === 'cases') {
+                document.getElementById('screen-cases').classList.add('active');
+                document.getElementById('nav-btn-cases').classList.add('active');
+            } else if (page === 'inventory') {
+                document.getElementById('screen-inventory').classList.add('active');
+                document.getElementById('nav-btn-inventory').classList.add('active');
+                renderInventory();
+            }
+        }
+
+        // Отрисовка предметов в инвентаре
+        function renderInventory() {
+            inventoryContainer.innerHTML = '';
+            if (inventory.length === 0) {
+                inventoryContainer.innerHTML = '<div class="empty-text">У вас пока нет предметов. Крутите кейсы!</div>';
+                return;
+            }
+
+            inventory.forEach((item) => {
+                const card = document.createElement('div');
+                card.className = 'inventory-item';
+                card.style.borderBottom = `4px solid ${item.color}`;
+                card.innerHTML = `
+                    <img src="${item.img}" alt="${item.name}">
+                    <span>${item.name}</span>
+                    <span class="item-price">${item.price} 🪙</span>
+                `;
+                
+                // При клике на предмет в инвентаре — предлагаем продать его
+                card.onclick = () => {
+                    const confirmSell = confirm(`Хотите продать ${item.name} за ${item.price} 🪙?`);
+                    if (confirmSell) {
+                        sellItemFromInventory(item.firebaseId, item.price);
+                    }
+                };
+
+                inventoryContainer.appendChild(card);
+            });
         }
 
         function setupRoulette() {
@@ -383,7 +575,7 @@
             }
 
             balance -= spinCost;
-            updateFirebaseBalance(); // Сохраняем списание в Firebase
+            updateFirebaseBalance();
             
             spinBtn.disabled = true;
             rewardBlock.style.display = 'none';
@@ -424,23 +616,9 @@
             }, 50);
         }
 
+        // Сохраняем выбитый предмет в инвентарь Firebase
         function claimItem() {
-            tg.HapticFeedback.impactOccurred('light');
-            alert(`Предмет ${lastWonItem[0]} добавлен в инвентарь!`);
-            rewardBlock.style.display = 'none';
-        }
-
-        function sellItem() {
             if (!lastWonItem) return;
-            balance += lastWonItem[2];
-            updateFirebaseBalance(); // Сохраняем продажу в Firebase
-            tg.HapticFeedback.notificationOccurred('success');
-            alert(`Успешно продано за ${lastWonItem[2]} монет!`);
-            rewardBlock.style.display = 'none';
-            lastWonItem = null;
-        }
+            tg.HapticFeedback.impactOccurred('light');
 
-        setupRoulette();
-    </script>
-</body>
-</html>
+  
