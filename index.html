@@ -8,9 +8,9 @@
     <!-- Подключаем Telegram SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-    <!-- Подключаем Firebase (App и Realtime Database) -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <!-- Подключаем стабильную CDN Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <style>
         * {
@@ -28,10 +28,9 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding: 20px 20px 90px 20px; /* Отступ снизу для меню навигации */
+            padding: 20px 20px 90px 20px;
         }
 
-        /* Верхняя панель */
         .header-panel {
             width: 100%;
             max-width: 400px;
@@ -71,7 +70,6 @@
             font-size: 16px;
         }
 
-        /* Экраны (Вкладки) */
         .page-screen {
             display: none;
             width: 100%;
@@ -82,7 +80,6 @@
             display: block;
         }
 
-        /* Контейнер кейса */
         .case-container {
             background: #2c2c2e;
             border-radius: 16px;
@@ -179,7 +176,6 @@
             box-shadow: none;
         }
 
-        /* Окно выигрыша рулетки */
         .reward-panel {
             display: none;
             background: #2c2c2e;
@@ -187,12 +183,6 @@
             padding: 20px;
             text-align: center;
             box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         .reward-title {
@@ -251,7 +241,6 @@
             border: 1px solid #ffd60a;
         }
 
-        /* СЕТКА ИНВЕНТАРЯ */
         .inventory-title {
             font-size: 20px;
             font-weight: bold;
@@ -302,7 +291,6 @@
             text-align: center;
         }
 
-        /* НИЖНЕЕ МЕНЮ НАВИГАЦИИ (ТАББАР) */
         .nav-bar {
             position: fixed;
             bottom: 0;
@@ -339,7 +327,6 @@
             margin-bottom: 4px;
         }
         
-        /* Загрузочный экран */
         #loading-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -356,18 +343,17 @@
 </head>
 <body>
 
-    <div id="loading-overlay">Синхронизация с базой данных...</div>
+    <div id="loading-overlay">Синхронизация...</div>
 
-    <!-- Верхняя панель игрока -->
     <div class="header-panel">
         <div class="user-info">Привет, <span id="username">Игрок</span>!</div>
         <div class="balance-box">
             <span>🪙</span>
-            <div class="balance-value" id="balance-display">0</div>
+            <div class="balance-value" id="balance-display">1000</div>
         </div>
     </div>
 
-    <!-- ЭКРАН 1: КЕЙСЫ -->
+    <!-- ЭКРАН КЕЙСОВ -->
     <div id="screen-cases" class="page-screen active">
         <div class="case-container" id="case-block">
             <h1>Кейс "Желание"</h1>
@@ -378,7 +364,7 @@
                 <div class="roulette-inner" id="roulette-track"></div>
             </div>
 
-            <button class="action-btn" id="spin-button" onclick="startSpin()" disabled>Загрузка...</button>
+            <button class="action-btn" id="spin-button" onclick="startSpin()">Испытать удачу</button>
         </div>
 
         <div class="reward-panel" id="reward-block">
@@ -394,7 +380,7 @@
         </div>
     </div>
 
-    <!-- ЭКРАН 2: ИНВЕНТАРЬ -->
+    <!-- ЭКРАН ИНВЕНТАРЯ -->
     <div id="screen-inventory" class="page-screen">
         <div class="inventory-title">Ваш инвентарь</div>
         <div class="inventory-grid" id="inventory-container">
@@ -402,7 +388,7 @@
         </div>
     </div>
 
-    <!-- НИЖНЕЕ МЕНЮ НАВИГАЦИИ -->
+    <!-- НАВИГАЦИЯ -->
     <div class="nav-bar">
         <div class="nav-item active" id="nav-btn-cases" onclick="switchPage('cases')">
             <div class="nav-icon">📦</div>
@@ -418,7 +404,7 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Конфигурация Firebase
+        // Данные Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDi-fArNcqqttIJYyvWvzF_h1PtdMykGOA",
             authDomain: "telegramcasesimulator.firebaseapp.com",
@@ -429,8 +415,15 @@
             appId: "1:1098622659944:web:c71f2256c3579e5dbebadd"
         };
         
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        let database = null;
+        let isFirebaseReady = false;
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+        } catch(e) {
+            console.log("Firebase init error", e);
+        }
 
         let userId = "demo_user"; 
         let firstName = "Игрок";
@@ -441,8 +434,10 @@
         }
         document.getElementById('username').innerText = firstName;
 
-        let balance = 0;
-        let inventory = []; // Сюда подгружаются предметы из базы: {id, name, img, price, color}
+        // Загружаем резервный баланс из локальной памяти устройства
+        let balance = parseInt(localStorage.getItem('my_balance')) || 1000;
+        let inventory = JSON.parse(localStorage.getItem('my_inventory')) || [];
+        
         const spinCost = 150;
         let lastWonItem = null;
 
@@ -463,48 +458,69 @@
         const inventoryContainer = document.getElementById('inventory-container');
         const cardWidth = 90;
 
-        // Синхронизация данных пользователя с Firebase
-        const userRef = database.ref('users/' + userId);
-        userRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                balance = data.balance !== undefined ? data.balance : 1000;
-                
-                // Обрабатываем инвентарь из Firebase
-                if (data.inventory) {
-                    // Firebase может отдавать объект, превращаем его в массив
-                    inventory = Object.keys(data.inventory).map(key => ({
-                        firebaseId: key,
-                        ...data.inventory[key]
-                    }));
-                } else {
-                    inventory = [];
-                }
-            } else {
-                balance = 1000;
-                inventory = [];
-                userRef.set({
-                    username: firstName,
-                    balance: balance,
-                    inventory: {}
-                });
-            }
-            
-            balanceDisplay.innerText = balance;
-            renderInventory();
-            
-            document.getElementById('loading-overlay').style.display = 'none';
-            spinBtn.disabled = false;
-            if (spinBtn.innerText === "Загрузка...") {
-                spinBtn.innerText = "Испытать удачу";
-            }
-        });
+        // Показываем стартовый баланс сразу
+        balanceDisplay.innerText = balance;
 
-        function updateFirebaseBalance() {
-            userRef.update({ balance: balance });
+        // Функция скрытия экрана загрузки
+        function hideLoading() {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) overlay.style.display = 'none';
         }
 
-        // Переключение экранов (Кейсы / Инвентарь)
+        // Предохранитель: если база данных долго отвечает, запускаем игру через 2.5 секунды на локальных данных
+        const fallbackTimeout = setTimeout(() => {
+            console.log("Firebase timeout, using local storage");
+            hideLoading();
+        }, 2500);
+
+        // Синхронизация с Firebase (если она работает)
+        if (database) {
+            const userRef = database.ref('users/' + userId);
+            userRef.on('value', (snapshot) => {
+                clearTimeout(fallbackTimeout); // База ответила, отменяем таймаут
+                isFirebaseReady = true;
+                
+                const data = snapshot.val();
+                if (data) {
+                    if (data.balance !== undefined) {
+                        balance = data.balance;
+                        localStorage.setItem('my_balance', balance);
+                    }
+                    if (data.inventory) {
+                        inventory = Object.keys(data.inventory).map(key => ({
+                            firebaseId: key,
+                            ...data.inventory[key]
+                        }));
+                        localStorage.setItem('my_inventory', JSON.stringify(inventory));
+                    } else {
+                        inventory = [];
+                        localStorage.setItem('my_inventory', JSON.stringify([]));
+                    }
+                } else {
+                    // Новый игрок на сервере
+                    userRef.set({
+                        username: firstName,
+                        balance: balance
+                    });
+                }
+                balanceDisplay.innerText = balance;
+                renderInventory();
+                hideLoading();
+            }, (error) => {
+                console.log("Firebase read error", error);
+                hideLoading();
+            });
+        }
+
+        function saveState() {
+            localStorage.setItem('my_balance', balance);
+            localStorage.setItem('my_inventory', JSON.stringify(inventory));
+            
+            if (isFirebaseReady && database) {
+                database.ref('users/' + userId).update({ balance: balance });
+            }
+        }
+
         function switchPage(page) {
             tg.HapticFeedback.impactOccurred('light');
             document.getElementById('screen-cases').classList.remove('active');
@@ -522,7 +538,6 @@
             }
         }
 
-        // Отрисовка предметов в инвентаре
         function renderInventory() {
             inventoryContainer.innerHTML = '';
             if (inventory.length === 0) {
@@ -530,7 +545,7 @@
                 return;
             }
 
-            inventory.forEach((item) => {
+            inventory.forEach((item, index) => {
                 const card = document.createElement('div');
                 card.className = 'inventory-item';
                 card.style.borderBottom = `4px solid ${item.color}`;
@@ -540,11 +555,10 @@
                     <span class="item-price">${item.price} 🪙</span>
                 `;
                 
-                // При клике на предмет в инвентаре — предлагаем продать его
                 card.onclick = () => {
                     const confirmSell = confirm(`Хотите продать ${item.name} за ${item.price} 🪙?`);
                     if (confirmSell) {
-                        sellItemFromInventory(item.firebaseId, item.price);
+                        sellItemFromInventory(item.firebaseId, item.price, index);
                     }
                 };
 
@@ -575,7 +589,8 @@
             }
 
             balance -= spinCost;
-            updateFirebaseBalance();
+            balanceDisplay.innerText = balance;
+            saveState();
             
             spinBtn.disabled = true;
             rewardBlock.style.display = 'none';
@@ -606,19 +621,4 @@
 
                 setTimeout(() => {
                     tg.HapticFeedback.notificationOccurred('success');
-                    document.getElementById('reward-image').src = winItem[1];
-                    document.getElementById('reward-name').innerText = winItem[0];
-                    document.getElementById('reward-card').style.borderColor = winItem[3];
-                    document.getElementById('sell-button-text').innerText = `Продать за ${winItem[2]} 🪙`;
-                    rewardBlock.style.display = 'block';
-                    spinBtn.disabled = false;
-                }, 4100);
-            }, 50);
-        }
-
-        // Сохраняем выбитый предмет в инвентарь Firebase
-        function claimItem() {
-            if (!lastWonItem) return;
-            tg.HapticFeedback.impactOccurred('light');
-
-  
+                    document.getElementById('reward-image').src = winItem[1
