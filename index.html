@@ -2,98 +2,170 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Telegram Stars Case Opener</title>
-    <!-- Подключаем Telegram Web Apps API -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Подключаем CDN Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        * { box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: #0f172a;
             color: #f8fafc;
             margin: 0;
-            padding: 20px;
-            text-align: center;
+            padding: 12px;
+            overflow-x: hidden;
+            user-select: none;
         }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
+        .container { max-width: 480px; margin: 0 auto; }
+        
         .header {
             background: #1e293b;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            padding: 12px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: 1px solid #334155;
         }
-        h1, h2, h3 { margin: 10px 0; }
-        .balance { color: #eab308; font-weight: bold; font-size: 1.2rem; }
-        
-        /* Сетка выбора кейсов */
+        #username-display { font-size: 0.95rem; color: #94a3b8; font-weight: 500; }
+        .balance { color: #eab308; font-weight: bold; font-size: 1.3rem; margin-top: 4px; }
+
+        h2 { font-size: 1.25rem; margin: 12px 0; color: #f1f5f9; }
+
+        /* Сетка выбора кейсов (Адаптивная под экраны телефонов) */
         .case-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 20px;
+            gap: 10px;
         }
         .case-card {
             background: #1e293b;
-            border: 2px solid #334155;
-            border-radius: 16px;
-            padding: 20px;
+            border: 1px solid #334155;
+            border-radius: 14px;
+            padding: 14px 8px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 105px;
         }
-        .case-card:hover {
-            transform: translateY(-2px);
-            border-color: #3b82f6;
+        .case-card h3 {
+            font-size: 0.85rem;
+            margin: 0 0 6px 0;
+            line-height: 1.2;
+            word-wrap: break-word;
         }
         .case-cost {
             color: #38bdf8;
-            font-weight: bold;
-            margin-top: 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
         }
 
-        /* Экран открытия */
+        /* Кнопки управления */
         .btn {
             background: #3b82f6;
             color: white;
             border: none;
-            padding: 12px 24px;
-            font-size: 1rem;
-            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            border-radius: 10px;
             cursor: pointer;
-            margin: 10px;
             font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
         }
-        .btn:hover { background: #2563eb; }
-        .btn-secondary { background: #475569; }
-        .btn-secondary:hover { background: #334155; }
+        .btn:disabled { background: #475569; color: #94a3b8; }
+        .btn-secondary { background: #334155; width: auto; padding: 6px 14px; font-size: 0.85rem; margin: 0; float: left; }
 
-        /* Простая анимация рулетки */
-        .roulette-wrapper {
+        /* НАСТОЯЩАЯ ГОРИЗОНТАЛЬНАЯ РУЛЕТКА */
+        .roulette-container {
             background: #1e293b;
-            padding: 30px;
-            border-radius: 16px;
-            margin: 20px 0;
-            border: 2px dashed #475569;
-            min-height: 150px;
+            border: 2px solid #334155;
+            border-radius: 14px;
+            margin: 15px 0;
+            position: relative;
+            overflow: hidden;
+            height: 95px;
+            display: flex;
+            align-items: center;
+        }
+        /* Центральный маркер выигрыша */
+        .roulette-container::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #eab308;
+            z-index: 10;
+            transform: translateX(-50%);
+            box-shadow: 0 0 8px #eab308;
+        }
+        .roulette-track {
+            display: flex;
+            position: absolute;
+            left: 0;
+            transition: transform 0s cubic-bezier(0.1, 0.6, 0.1, 1);
+            will-change: transform;
+        }
+        .roulette-item {
+            width: 80px;
+            height: 75px;
+            background: #111827;
+            border: 1px solid #334155;
+            margin: 0 3px;
+            border-radius: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            font-size: 0.75rem;
+            padding: 4px;
+            text-align: center;
+            flex-shrink: 0;
         }
-        .drop-title { font-size: 1.5rem; font-weight: bold; margin-top: 10px; color: #4ade80; }
-        .drop-price { color: #94a3b8; margin-top: 5px; }
+        .roulette-item .icon { font-size: 1.6rem; margin-bottom: 2px; }
+        .roulette-item .name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+
+        /* Список предметов под кейсом */
+        .loot-info-section {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .loot-list {
+            background: #1e293b;
+            border-radius: 14px;
+            padding: 8px;
+            border: 1px solid #334155;
+        }
+        .loot-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #334155;
+            font-size: 0.85rem;
+        }
+        .loot-item-row:last-child { border-bottom: none; }
+        .loot-name { font-weight: 500; display: flex; align-items: center; gap: 4px;}
+        .loot-details { text-align: right; }
+        .loot-chance { color: #4ade80; font-weight: bold; font-size: 0.8rem; }
+        .loot-price { color: #94a3b8; font-size: 0.75rem; }
+
+        .clearfix::after { content: ""; clear: both; display: table; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <div id="username-display">Загрузка игрока...</div>
+        <div id="username-display">Синхронизация...</div>
         <div class="balance">Баланс: <span id="balance-value">0</span> ⭐</div>
     </div>
 
@@ -103,44 +175,43 @@
         <div class="case-grid" id="case-grid-container"></div>
     </div>
 
-    <!-- 2. ЭКРАН РУЛЕТКИ -->
+    <!-- 2. ЭКРАН РУЛЕТКИ И ДРОП-ЛИСТА -->
     <div id="opening-screen" style="display: none;">
-        <button class="btn btn-secondary" onclick="backToMenu()">↩️ В магазин</button>
-        <h2 id="current-case-name">Название кейса</h2>
+        <div class="clearfix" style="margin-bottom: 10px;">
+            <button class="btn btn-secondary" onclick="backToMenu()">↩️ Назад</button>
+        </div>
+        <h2 id="current-case-name" style="margin-top: 5px;">Название кейса</h2>
         
-        <div class="roulette-wrapper">
-            <div id="roulette-status">Нажмите кнопку, чтобы открыть кейс</div>
-            <div id="drop-result" style="display: none;">
-                <div class="drop-title" id="drop-name">Item</div>
-                <div class="drop-price" id="drop-price">0 ⭐</div>
+        <!-- Окно рулетки -->
+        <div class="roulette-container">
+            <div class="roulette-track" id="roulette-track">
+                <!-- Элементы генерируются динамически -->
             </div>
         </div>
         
         <button class="btn" id="open-btn" onclick="triggerOpenCase()">Открыть кейс</button>
+
+        <!-- Список предметов внутри кейса -->
+        <div class="loot-info-section">
+            <h3 style="font-size: 1rem; color: #94a3b8; padding-left: 4px;">Содержимое кейса:</h3>
+            <div class="loot-list" id="loot-list-container"></div>
+        </div>
     </div>
 </div>
 
 <script>
-    // ==========================================
-    // НАСТРОЙКА SUPABASE
-    // ==========================================
     const SUPABASE_URL = "https://nfqishqrigetyvnymzss.supabase.co"; 
-    // ВНИМАНИЕ: Сюда между кавычек вставь свой длинный anon public ключ!
-    const SUPABASE_KEY = "sb_publishable_9y2KDUKbDFpRnnGKJA-udg_gZvu7fQk"; 
+    const SUPABASE_KEY = "СЮДА_ВСТАВЬ_СВОЙ_ДЛИННЫЙ_ANON_KEY"; 
     
-    // Инициализация клиента Supabase с безопасной проверкой глобального объекта
-    supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Данные по умолчанию
     let userId = "123456789"; 
     let username = "Gamer";
     let userBalance = 0;
     let userInventory = {};
     let selectedCaseKey = null;
+    let isRolling = false;
 
-    // ==========================================
-    // ПОЛНАЯ ДАТАБАЗА ПРЕДМЕТОВ И ЦЕН
-    // ==========================================
     const ITEMS = {
         '💖Сердце': {price: 15}, '🌹Роза': {price: 25}, '🚀Ракета': {price: 50}, '💐Цветы': {price: 50}, '🃏Шапка шута': {price: 500}, '🐶Снуп Догг': {price: 425}, '💍Кольцо': {price: 100}, '💎Алмаз': {price: 100}, '🍭Лол-поп': {price: 325},
         '🐍Лунная змея': {price: 350}, '📟Гаджет Тамы': {price: 450}, '☕Праздничный напиток': {price: 450}, '🔮Ведьмина шляпа': {price: 725}, '👁️Злой глаз': {price: 925}, '🧪Зелье любви': {price: 2075},
@@ -155,9 +226,6 @@
         '💍Bonded Ring (Leopard)': {price: 30325}, '🐸Kissed Frog (Sarutoad)': {price: 133200}, '🔑UFC Strike (Keychain Red)': {price: 237050}, '🎃Mad Pumpkin (Cucurbita)': {price: 360500}, '🌹Eternal Rose (Paper Bloom)': {price: 1075025}, '🦜Rare Bird (Amber Toucan)': {price: 3625000}
     };
 
-    // ==========================================
-    // КОНФИГУРАЦИЯ КЕЙСОВ И ТОЧНЫЕ ВЕСА (ШАНСЫ)
-    // ==========================================
     const CASE_CONFIG = {
         'free': { name: "📦 Бесплатный кейс", cost: 0, items: [['💖Сердце', 60], ['🌹Роза', 17], ['🚀Ракета', 7], ['💐Цветы', 7], ['💍Кольцо', 3], ['💎Алмаз', 3], ['🍭Лол-поп', 1.5], ['🐶Снуп Догг', 1], ['🃏Шапка шута', 0.5]] },
         'poor': { name: "💼 Кейс \"Бедный\"", cost: 220, items: [['💎Алмаз', 21], ['💍Кольцо', 18.5], ['🍭Лол-поп', 16], ['🐍Лунная змея', 15], ['📟Гаджет Тамы', 12], ['☕Праздничный напиток', 10], ['🔮Ведьмина шляпа', 5], ['👁️Злой глаз', 2], ['🧪Зелье любви', 0.5]] },
@@ -165,8 +233,8 @@
         'summer': { name: "☀️ Летний кейс", cost: 689, items: [['🍦Мороженое Вайс', 43.4], ['🍧Летнее мороженое', 12], ['🦆Надувной круг Утка', 12], ['🏄Доска для серфинга', 10], ['🍭Гипно-леденец', 8], ['🚬Винтажная сигара', 5], ['🍄Мухомор-шпион', 5], ['💨Ионный фен', 4], ['🐍Тропическая змея', 0.5], ['🐒Веселая шимпанзе', 0.09], ['🐠Набор Аквариум', 0.01]] },
         'prokuror': { name: "⚖️ Кейс \"Прокурор\"", cost: 840, items: [['🕵️Снуп Догг (Дабл Джи)', 39], ['🎩Цилиндр (Клокверк)', 20], ['🦋Галстук-бабочка (Классический)', 9], ['💂Папаха (К)', 7], ['🕯️Свеча (Чёрная)', 4], ['🚗Лоурайдер (Л.А. Нуар)', 0.7], ['🧪Духи (Алый Поцелуй)', 0.3]] },
         'rich': { name: "💰 Кейс \"Богач\"", cost: 1364, items: [['💐Роскошный букет', 35], ['🐰Мармеладный зайчик', 25], ['👁️Злой глаз', 21], ['🎃Безумная тыква', 9], ['💨Ионный сушильник', 5], ['🐱Шлем неко', 4], ['💎Драгоценный значок', 0.85], ['🪖Героический шлем', 0.15]] },
-        'fr_ht': { name: "💙 Кейс \"Замороженное Сердце\"", cost: 4500, items: [['🕯️Вечная свеча (пузырьковая ванна)', 45.8], ['💙Купидонский амулет (кристально чистый)', 23], ['🧪Зелье любви (Ледяная королева)', 15], ['🥶Безумная тыква (Обморожение)', 10], ['🐸Поцелованная Лягушка (Эктолягушка)', 4], ['💎Астральный осколок (Аквариум)', 1.6], ['🍑Драгоценная персика (пузырьчато-синий)', 0.6]] },
-        'mouth': { name: "🧼 Кейс \"Полость для пености рта\"", cost: 12000, items: [['🐱Испуганный кот (Ментос)', 0.25], ['🪖Героический шлем (Робенгуда)', 0.35], ['🤟Знак Вестсайда (Сапфир)', 1.0], ['🛍️Сумка с добычей (Синий Версо)', 1.5], ['🐒Весёлый шимпанзе (Кристалл)', 3.0], ['🔥Прохладное пламя (Космический корабль)', 5.0], ['🧦Свежие носки (Основание)', 8.0], ['🍪Счастливое брауни (Печеньковый монстр)', 17.0], ['🔑Клавиша ввода (Телеграм)', 25.9], ['🧤Снежные рукавицы (Розовые манжеты)', 38.0]] },
+        'fr_ht': { name: "💙 Замороженное Сердце", cost: 4500, items: [['🕯️Вечная свеча (пузырьковая ванна)', 45.8], ['💙Купидонский амулет (кристально чистый)', 23], ['🧪Зелье любви (Ледяная королева)', 15], ['🥶Безумная тыква (Обморожение)', 10], ['🐸Поцелованная Лягушка (Эктолягушка)', 4], ['💎Астральный осколок (Аквариум)', 1.6], ['🍑Драгоценная персика (пузырьчато-синий)', 0.6]] },
+        'mouth': { name: "🧼 Полость для пености рта", cost: 12000, items: [['🐱Испуганный кот (Ментос)', 0.25], ['🪖Героический шлем (Робенгуда)', 0.35], ['🤟Знак Вестсайда (Сапфир)', 1.0], ['🛍️Сумка с добычей (Синий Версо)', 1.5], ['🐒Весёлый шимпанзе (Кристалл)', 3.0], ['🔥Прохладное пламя (Космический корабль)', 5.0], ['🧦Свежие носки (Основание)', 8.0], ['🍪Счастливое брауни (Печеньковый монстр)', 17.0], ['🔑Клавиша ввода (Телеграм)', 25.9], ['🧤Снежные рукавицы (Розовые манжеты)', 38.0]] },
         'cats': { name: "🐱 Кейс \"Кошки\"", cost: 40000, items: [['🐸Плюшевый Пеп (ядовитый дротик)', 0.1], ['💖Астральный Кристал(Розовый)', 0.3], ['🧢Шапка Дурова (Веселое время)', 0.7], ['💵Ручной кирпич (денежный ролл)', 1.5], ['🧞Lampa джинния (дух кошки)', 2.2], ['🌙Нежный браслет (Лунный кот)', 4.0], ['🐈‍⬛Напуганный кот (Обелиск)', 6.0], ['🔮Нежный браслет (для кошек)', 9.5], ['🥷Собака сопротивления', 13.0], ['🐱Прикованное кольцо (кошачья кровать)', 24.7], ['💍Драгоценный значок (старая бронза)', 38.0]] },
         'nft_battle': { name: "✔️ Кейс \"Подтверждение\"", cost: 135000, items: [['🖤Значок сердца (черепашки)', 0.1], ['🖤Плюшевый Пеп (Эмо-мальчик)', 0.3], ['💜Значок сердца (ночной клуб)', 2.0], ['🧢Шапка Дурова (Тень)', 5.0], ['🖤Драгоценная персика (персик черный)', 20.0], ['👜Мешок для добычи (черный кошелек)', 20.0], ['🪖Героический шлем (Преторианский)', 22.6], ['🧱Ручной кирпич (бетон)', 30.0]] },
         'wish_case': { name: "✨ Кейс \"Желание\"", cost: 250000, items: [['💍Bonded Ring (Leopard)', 43.0], ['🐸Kissed Frog (Sarutoad)', 35.0], ['🔑UFC Strike (Keychain Red)', 10.5], ['🎃Mad Pumpkin (Cucurbita)', 7.0], ['🌹Eternal Rose (Paper Bloom)', 3.0], ['🦜Rare Bird (Amber Toucan)', 1.5]] }
@@ -175,53 +243,42 @@
     function formatStars(num) {
         if (!num) return "0";
         let absNum = Math.abs(num);
-        if (absNum >= 1e12) return (num / 1e12).toFixed(2) + "Т";
-        if (absNum >= 1e9) return (num / 1e9).toFixed(2) + "Б";
-        if (absNum >= 1e6) return (num / 1e6).toFixed(2) + "М";
-        if (absNum >= 1e3) return (num / 1e3).toFixed(2) + "к";
+        if (absNum >= 1e12) return (num / 1e12).toFixed(1) + "Т";
+        if (absNum >= 1e9) return (num / 1e9).toFixed(1) + "Б";
+        if (absNum >= 1e6) return (num / 1e6).toFixed(1) + "М";
+        if (absNum >= 1e3) return (num / 1e3).toFixed(1) + "к";
         return num.toString();
     }
 
-    // Загрузка игрока
     async function loadUserData() {
-        try {
-            // Сообщаем Telegram Mini App, что приложение готово к работе
-            if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.ready();
-                window.Telegram.WebApp.expand();
-                const tgData = window.Telegram.WebApp.initDataUnsafe;
-                if (tgData && tgData.user) {
-                    userId = tgData.user.id.toString();
-                    username = tgData.user.username || tgData.user.first_name || "Gamer";
-                }
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+            const tgData = window.Telegram.WebApp.initDataUnsafe;
+            if (tgData && tgData.user) {
+                userId = tgData.user.id.toString();
+                username = tgData.user.username || tgData.user.first_name || "Gamer";
             }
+        }
+        document.getElementById("username-display").innerText = "@" + username;
 
-            document.getElementById("username-display").innerText = "@" + username;
-
-            // Получаем данные из таблицы users в Supabase
+        try {
             let { data, error } = await supabase.from('users').select('*').eq('id', userId).maybeSingle();
-
             if (error) throw error;
 
             if (!data) {
-                // Если игрока нет, создаем профиль со стартовым балансом 5000
                 const newUser = { id: userId, username: username, balance: 5000, inventory: {} };
-                const { error: insertError } = await supabase.from('users').insert([newUser]);
-                if (insertError) throw insertError;
-                userBalance = newUser.balance;
-                userInventory = newUser.inventory;
+                await supabase.from('users').insert([newUser]);
+                userBalance = 5000;
+                userInventory = {};
             } else {
                 userBalance = data.balance || 0;
                 userInventory = data.inventory || {};
             }
-
             updateUI();
             renderMenu();
-
-        } catch (err) {
-            console.error("Критическая ошибка Supabase:", err);
-            document.getElementById("username-display").innerText = "Ошибка подключения";
-            document.getElementById("username-display").style.color = "#ef4444";
+        } catch (e) {
+            document.getElementById("username-display").innerText = "Ошибка БД";
         }
     }
 
@@ -232,7 +289,6 @@
     function renderMenu() {
         const container = document.getElementById("case-grid-container");
         container.innerHTML = "";
-
         Object.keys(CASE_CONFIG).forEach(key => {
             const caseInfo = CASE_CONFIG[key];
             const card = document.createElement("div");
@@ -247,80 +303,150 @@
     }
 
     function openCaseScreen(key) {
+        if(isRolling) return;
         selectedCaseKey = key;
         const caseInfo = CASE_CONFIG[key];
         
         document.getElementById("menu-screen").style.display = "none";
         document.getElementById("opening-screen").style.display = "block";
         document.getElementById("current-case-name").innerText = caseInfo.name;
-        
-        document.getElementById("roulette-status").style.display = "block";
-        document.getElementById("roulette-status").innerText = `Стоимость: ${formatStars(caseInfo.cost)} ⭐`;
-        document.getElementById("drop-result").style.display = "none";
         document.getElementById("open-btn").disabled = false;
+        document.getElementById("open-btn").innerText = `Открыть за ${formatStars(caseInfo.cost)} ⭐`;
+
+        generateLootList(caseInfo.items);
+        resetRoulette(caseInfo.items);
     }
 
     function backToMenu() {
+        if(isRolling) return;
         document.getElementById("menu-screen").style.display = "block";
         document.getElementById("opening-screen").style.display = "none";
         selectedCaseKey = null;
     }
 
+    // Генерация дроп-листа под рулеткой
+    function generateLootList(itemsArray) {
+        const container = document.getElementById("loot-list-container");
+        container.innerHTML = "";
+        
+        // Сортируем от редких к частым
+        const sortedItems = [...itemsArray].sort((a,b) => a[1] - b[1]);
+
+        sortedItems.forEach(([name, chance]) => {
+            const price = ITEMS[name] ? ITEMS[name].price : 0;
+            const row = document.createElement("div");
+            row.className = "loot-item-row";
+            row.innerHTML = `
+                <div class="loot-name">${name}</div>
+                <div class="loot-details">
+                    <div class="loot-chance">${chance}%</div>
+                    <div class="loot-price">${formatStars(price)} ⭐</div>
+                </div>
+            `;
+            container.appendChild(row);
+        });
+    }
+
+    // Заполнение рулетки случайными вещами до старта
+    function resetRoulette(itemsArray) {
+        const track = document.getElementById("roulette-track");
+        track.style.transition = "none";
+        track.style.transform = "translateX(0px)";
+        track.innerHTML = "";
+
+        // Создаем 35 плашек для эффекта прокрутки
+        for (let i = 0; i < 35; i++) {
+            const randomName = itemsArray[Math.floor(Math.random() * itemsArray.length)][0];
+            track.appendChild(createItemNode(randomName));
+        }
+    }
+
+    function createItemNode(fullName) {
+        const node = document.createElement("div");
+        node.className = "roulette-item";
+        
+        // Отделяем эмодзи от текста
+        const emojiMatch = fullName.match(/[\u{1F300}-\u{1F9FF}\u{2700}-\u{27BF}]+/u);
+        const emoji = emojiMatch ? emojiMatch[0] : "📦";
+        const cleanName = fullName.replace(emoji, "").trim();
+
+        node.innerHTML = `
+            <div class="icon">${emoji}</div>
+            <div class="name">${cleanName}</div>
+        `;
+        return node;
+    }
+
     function getRandomItem(itemsArray) {
         let totalWeight = itemsArray.reduce((sum, item) => sum + item[1], 0);
         let randomNum = Math.random() * totalWeight;
-        
         for (let i = 0; i < itemsArray.length; i++) {
-            if (randomNum < itemsArray[i][1]) {
-                return itemsArray[i][0];
-            }
+            if (randomNum < itemsArray[i][1]) return itemsArray[i][0];
             randomNum -= itemsArray[i][1];
         }
         return itemsArray[0][0];
     }
 
+    // Логика плавной прокрутки рулетки
     async function triggerOpenCase() {
-        if (!selectedCaseKey) return;
-        
+        if (isRolling || !selectedCaseKey) return;
         const caseInfo = CASE_CONFIG[selectedCaseKey];
-        
+
         if (userBalance < caseInfo.cost) {
             alert("Недостаточно звёзд!");
             return;
         }
 
+        isRolling = true;
         document.getElementById("open-btn").disabled = true;
-        document.getElementById("roulette-status").innerText = "🎰 Открываем кейс...";
 
-        const droppedItemName = getRandomItem(caseInfo.items);
-        const itemPrice = ITEMS[droppedItemName] ? ITEMS[droppedItemName].price : 0;
+        // Вычисляем победителя
+        const winningItem = getRandomItem(caseInfo.items);
 
+        // Списываем баланс локально
         userBalance -= caseInfo.cost;
-        userInventory[droppedItemName] = (userInventory[droppedItemName] || 0) + 1;
+        userInventory[winningItem] = (userInventory[winningItem] || 0) + 1;
+        updateUI();
 
-        const { error } = await supabase
-            .from('users')
-            .update({ balance: userBalance, inventory: userInventory })
-            .eq('id', userId);
-
+        // Отправляем апдейт в базу Supabase
+        const { error } = await supabase.from('users').update({ balance: userBalance, inventory: userInventory }).eq('id', userId);
         if (error) {
-            alert("Ошибка сохранения в базу данных!");
+            alert("Ошибка соединения с БД!");
+            isRolling = false;
             document.getElementById("open-btn").disabled = false;
             return;
         }
 
-        updateUI();
+        // Пересобираем ленту: ставим выигранный предмет ровно на 28 позицию
+        const track = document.getElementById("roulette-track");
+        const itemsNodes = track.children;
+        
+        for(let i=0; i<35; i++) {
+            if(i === 28) {
+                track.replaceChild(createItemNode(winningItem), itemsNodes[i]);
+            } else {
+                const randName = caseInfo.items[Math.floor(Math.random() * caseInfo.items.length)][0];
+                track.replaceChild(createItemNode(randName), itemsNodes[i]);
+            }
+        }
+
+        // Рассчитываем точное смещение рулетки для центрирования 28-го элемента
+        const itemWidth = 86; // 80px ширина + 6px отступы
+        const containerWidth = document.querySelector('.roulette-container').offsetWidth;
+        const centerOffset = (containerWidth / 2) - (itemWidth / 2);
+        const finalX = -(28 * itemWidth) + centerOffset;
+
+        // Запуск красивой анимации (крутится 4 секунды)
+        track.style.transition = "transform 4s cubic-bezier(0.15, 0.85, 0.15, 1)";
+        track.style.transform = `translateX(${finalX}px)`;
 
         setTimeout(() => {
-            document.getElementById("roulette-status").style.display = "none";
-            document.getElementById("drop-name").innerText = droppedItemName;
-            document.getElementById("drop-price").innerText = `Ценность: ${formatStars(itemPrice)} ⭐`;
-            document.getElementById("drop-result").style.display = "block";
+            isRolling = false;
             document.getElementById("open-btn").disabled = false;
-        }, 1000);
+            // Слегка подсветим кнопку или дадим уведомление
+        }, 4200);
     }
 
-    // Инициализация при полной загрузке страницы
     window.addEventListener('DOMContentLoaded', loadUserData);
 </script>
 </body>
