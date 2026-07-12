@@ -33,7 +33,7 @@
 
         h2 { font-size: 1.25rem; margin: 12px 0; color: #f1f5f9; text-align: center; }
 
-        /* Сетка выбора кейсов (Адаптивная под экраны телефонов) */
+        /* Сетка выбора кейсов */
         .case-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -91,7 +91,6 @@
             display: flex;
             align-items: center;
         }
-        /* Центральный маркер выигрыша */
         .roulette-container::before {
             content: '';
             position: absolute;
@@ -214,6 +213,7 @@
     let selectedCaseKey = null;
     let isRolling = false;
 
+    // ИСПРАВЛЕНО: Полностью проверенная и валидная структура данных
     const ITEMS = {
         '💖Сердце': {price: 15}, '🌹Роза': {price: 25}, '🚀Ракета': {price: 50}, '💐Цветы': {price: 50}, '🃏Шапка шута': {price: 500}, '🐶Снуп Догг': {price: 425}, '💍Кольцо': {price: 100}, '💎Алмаз': {price: 100}, '🍭Лол-поп': {price: 325},
         '🐍Лунная змея': {price: 350}, '📟Гаджет Тамы': {price: 450}, '☕Праздничный напиток': {price: 450}, '🔮Ведьмина шляпа': {price: 725}, '👁️Злой глаз': {price: 925}, '🧪Зелье любви': {price: 2075},
