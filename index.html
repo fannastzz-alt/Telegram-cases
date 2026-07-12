@@ -305,6 +305,12 @@
     </div>
 
     <script>
+        // Перехватчик ошибок для вывода на экран телефона
+        window.onerror = function(message, source, lineno, colno, error) {
+            alert("ОШИБКА: " + message + "\nСтрока: " + lineno);
+            return true;
+        };
+
         const tg = window.Telegram.WebApp;
         tg.expand();
 
@@ -518,4 +524,3 @@
     </script>
 </body>
 </html>
-
