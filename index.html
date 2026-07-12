@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Симулятор Кейсов Telegram</title>
-    <!-- Подключаем Firebase скрипты (версия 8.x.x) -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- Подключаем Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Подключаем Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -309,19 +308,10 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Единственный и верный блок конфигурации Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyDi-fArNcqqttIJYyvWvzF_h1PtdMykGOA",
-            authDomain: "telegramcasesimulator.firebaseapp.com",
-            databaseURL: "https://telegramcasesimulator-default-rtdb.firebaseio.com",
-            projectId: "telegramcasesimulator",
-            storageBucket: "telegramcasesimulator.firebasestorage.app",
-            messagingSenderId: "1098622659944",
-            appId: "1:1098622659944:web:c71f2256c3579e5dbebadd"
-        };
-        
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        // Инициализация Supabase
+        const SUPABASE_URL = "https://nfqishqrigetyvnymzss.supabase.co";
+        const SUPABASE_KEY = "Sb_publishable_9y2KDUKbDFpRnnGKJA-udg_gZvu7fQk";
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let userId = "demo_user"; 
         let firstName = "Игрок";
@@ -337,7 +327,6 @@
         const spinCost = 150;
         let lastWonItem = null;
 
-        // Пул скинов (Название, файл картинки, цена продажи, цвет редкости)
         const pool = [
             ["Froggy", "frog.png", 50, "#30d158"],
             ["Froggy", "frog.png", 50, "#30d158"],
@@ -353,30 +342,49 @@
         const rewardBlock = document.getElementById('reward-block');
         const balanceDisplay = document.getElementById('balance-display');
         const inventoryContainer = document.getElementById('inventory-container');
-        const cardWidth = 94; // 90px ширина карточки + 4px отступы
+        const cardWidth = 94;
 
-        // Привязка и синхронизация с Realtime Database
-        const userRef = database.ref('users/' + userId);
-        userRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                balance = data.balance !== undefined ? data.balance : 1000;
-                if (data.inventory) {
-                    localInventory = Object.keys(data.inventory).map(key => ({
-                        id: key,
-                        ...data.inventory[key]
-                    }));
-                } else {
-                    localInventory = [];
+        // Загрузка или создание профиля игрока
+        async function loadUserData() {
+            try {
+                let { data: user, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('id', userId)
+                    .maybeSingle();
+
+                if (!user) {
+                    const { data: newUser, error: insertError } = await supabase
+                        .from('users')
+                        .insert([{ id: userId, username: firstName, balance: 1000, inventory: [] }])
+                        .select()
+                        .maybeSingle();
+                    user = newUser;
                 }
-            } else {
-                balance = 1000;
-                userRef.set({ username: firstName, balance: balance });
-            }
-            balanceDisplay.innerText = balance;
-        });
 
-        // Навигация по страницам приложения
+                if (user) {
+                    balance = user.balance;
+                    localInventory = user.inventory || [];
+                    balanceDisplay.innerText = balance;
+                }
+            } catch (err) {
+                console.error("Ошибка загрузки данных:", err);
+            }
+        }
+
+        // Сохранение баланса и инвентаря
+        async function saveUserData() {
+            try {
+                await supabase
+                    .from('users')
+                    .update({ balance: balance, inventory: localInventory })
+                    .eq('id', userId);
+                balanceDisplay.innerText = balance;
+            } catch (err) {
+                console.error("Ошибка сохранения данных:", err);
+            }
+        }
+
         function switchPage(page) {
             document.getElementById('screen-cases').classList.remove('active');
             document.getElementById('screen-inventory').classList.remove('active');
@@ -393,7 +401,6 @@
             }
         }
 
-        // Вывод инвентаря на экран
         function renderInventory() {
             inventoryContainer.innerHTML = '';
             if (localInventory.length === 0) {
@@ -410,18 +417,18 @@
                     <span style="margin-top:5px;">${item.name}</span>
                     <span style="color:#ffd60a;">${item.price} 🪙</span>
                 `;
-                card.onclick = () => {
+                card.onclick = async () => {
                     if (confirm(`Продать ${item.name} за ${item.price} 🪙?`)) {
                         balance += item.price;
-                        userRef.update({ balance: balance });
-                        userRef.child('inventory').child(item.id).remove();
+                        localInventory = localInventory.filter(i => i.id !== item.id);
+                        await saveUserData();
+                        renderInventory();
                     }
                 };
                 inventoryContainer.appendChild(card);
             });
         }
 
-        // Заполнение рулетки случайными элементами
         function setupRoulette() {
             track.innerHTML = '';
             for (let i = 0; i < 50; i++) {
@@ -437,14 +444,13 @@
             }
         }
 
-        // Запуск кручения
         function startSpin() {
             if (balance < spinCost) {
                 alert("Недостаточно монет!");
                 return;
             }
             balance -= spinCost;
-            userRef.update({ balance: balance });
+            saveUserData();
             
             spinBtn.disabled = true;
             rewardBlock.style.display = 'none';
@@ -454,7 +460,7 @@
             setupRoulette();
 
             setTimeout(() => {
-                const winIndex = 35; // Предмет, на котором остановится стрелка
+                const winIndex = 35;
                 const winItem = pool[Math.floor(Math.random() * pool.length)];
                 lastWonItem = winItem;
 
@@ -472,7 +478,6 @@
                 track.style.transition = 'transform 4s cubic-bezier(0.1, 0.6, 0.1, 1)';
                 track.style.transform = `translateX(${targetX}px)`;
 
-                // Отображение выигрыша по окончании анимации
                 setTimeout(() => {
                     document.getElementById('reward-image').src = winItem[1];
                     document.getElementById('reward-name').innerText = winItem[0];
@@ -484,31 +489,32 @@
             }, 50);
         }
 
-        // Забрать предмет в рюкзак
-        function claimItem() {
+        async function claimItem() {
             if (!lastWonItem) return;
-            userRef.child('inventory').push({
+            localInventory.push({
+                id: Date.now().toString(),
                 name: lastWonItem[0],
                 img: lastWonItem[1],
                 price: lastWonItem[2],
                 color: lastWonItem[3]
             });
+            await saveUserData();
             alert("Предмет успешно добавлен в инвентарь!");
             rewardBlock.style.display = 'none';
             lastWonItem = null;
         }
 
-        // Мгновенная продажа
-        function sellItem() {
+        async function sellItem() {
             if (!lastWonItem) return;
             balance += lastWonItem[2];
-            userRef.update({ balance: balance });
+            await saveUserData();
             rewardBlock.style.display = 'none';
             lastWonItem = null;
         }
 
-        // Первичный запуск рулетки при старте
-        setupRoulette();
+        loadUserData().then(() => {
+            setupRoulette();
+        });
     </script>
 </body>
 </html>
