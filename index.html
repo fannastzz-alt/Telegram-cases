@@ -4,8 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Симулятор Кейсов Pro</title>
-    <!-- Подключаем официальный скрипт Telegram WebApp SDK -->
+    
+    <!-- Подключаем Telegram SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- Подключаем Firebase (App и Realtime Database) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
     <style>
         * {
             box-sizing: border-box;
@@ -25,7 +31,6 @@
             padding: 20px;
         }
 
-        /* Верхняя панель игрока */
         .header-panel {
             width: 100%;
             max-width: 400px;
@@ -65,7 +70,6 @@
             font-size: 16px;
         }
 
-        /* Контейнер кейса */
         .case-container {
             width: 100%;
             max-width: 400px;
@@ -90,7 +94,6 @@
             font-weight: 500;
         }
 
-        /* Рулетка */
         .roulette-wrapper {
             position: relative;
             width: 100%;
@@ -102,7 +105,6 @@
             margin-bottom: 20px;
         }
 
-        /* Красная линия прицела */
         .pointer {
             position: absolute;
             top: 0;
@@ -140,7 +142,6 @@
             padding: 6px;
         }
 
-        /* Стили для картинок предметов в рулетке */
         .item-img {
             width: 45px;
             height: 45px;
@@ -148,7 +149,6 @@
             margin-bottom: 6px;
         }
 
-        /* Главная кнопка кручения */
         .action-btn {
             width: 100%;
             background: #30d158;
@@ -160,21 +160,14 @@
             border-radius: 12px;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(48, 209, 88, 0.3);
-            transition: background 0.2s, transform 0.1s;
-        }
-
-        .action-btn:active {
-            transform: scale(0.98);
         }
 
         .action-btn:disabled {
             background: #3a3a3c;
             color: #8e8e93;
             box-shadow: none;
-            cursor: not-allowed;
         }
 
-        /* Окно с выигрышем */
         .reward-panel {
             display: none;
             width: 100%;
@@ -184,12 +177,6 @@
             padding: 20px;
             text-align: center;
             box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-            animation: fadeIn 0.4s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         .reward-title {
@@ -234,7 +221,6 @@
             font-weight: 600;
             border-radius: 10px;
             border: none;
-            cursor: pointer;
         }
 
         .keep-btn {
@@ -247,20 +233,34 @@
             color: #ffd60a;
             border: 1px solid #ffd60a;
         }
+        
+        /* Загрузочный экран пока база данных не ответит */
+        #loading-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #1c1c1e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            font-size: 18px;
+            font-weight: bold;
+            color: #aeaeb2;
+        }
     </style>
 </head>
 <body>
 
-    <!-- Верхняя панель -->
+    <div id="loading-overlay">Синхронизация с базой данных...</div>
+
     <div class="header-panel">
         <div class="user-info">Привет, <span id="username">Игрок</span>!</div>
         <div class="balance-box">
             <span>🪙</span>
-            <div class="balance-value" id="balance-display">1000</div>
+            <div class="balance-value" id="balance-display">0</div>
         </div>
     </div>
 
-    <!-- Основной блок кейса -->
     <div class="case-container" id="case-block">
         <h1>Кейс "Желание"</h1>
         <div class="price-tag">Стоимость открытия: 150 🪙</div>
@@ -270,10 +270,9 @@
             <div class="roulette-inner" id="roulette-track"></div>
         </div>
 
-        <button class="action-btn" id="spin-button" onclick="startSpin()">Испытать удачу</button>
+        <button class="action-btn" id="spin-button" onclick="startSpin()" disabled>Загрузка...</button>
     </div>
 
-    <!-- Блок решения (Забрать / Продать) -->
     <div class="reward-panel" id="reward-block">
         <div class="reward-title">🎉 Поздравляем! Ваш выигрыш:</div>
         <div class="reward-item" id="reward-card">
@@ -287,21 +286,37 @@
     </div>
 
     <script>
-        // Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Подгружаем имя пользователя из Telegram
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            document.getElementById('username').innerText = tg.initDataUnsafe.user.first_name;
-        }
+        // 1. Инициализация Firebase с твоими ключами
+        const firebaseConfig = {
+            apiKey: "AIzaSyDi-fArNcqqttIJYyvWvzF_h1PtdMykGOA",
+            authDomain: "telegramcasesimulator.firebaseapp.com",
+            databaseURL: "https://telegramcasesimulator-default-rtdb.firebaseio.com",
+            projectId: "telegramcasesimulator",
+            storageBucket: "telegramcasesimulator.firebasestorage.app",
+            messagingSenderId: "1098622659944",
+            appId: "1:1098622659944:web:c71f2256c3579e5dbebadd"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-        // Логика баланса
-        let balance = 1000;
+        // 2. Определяем Telegram ID пользователя
+        let userId = "demo_user"; 
+        let firstName = "Игрок";
+
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            userId = tg.initDataUnsafe.user.id.toString();
+            firstName = tg.initDataUnsafe.user.first_name;
+        }
+        document.getElementById('username').innerText = firstName;
+
+        let balance = 0;
         const spinCost = 150;
         let lastWonItem = null;
 
-        // Список предметов: [Название, Путь к картинке, Цена продажи, Цвет редкости]
         const pool = [
             ["Froggy", "frog.png", 50, "#30d158"],
             ["Froggy", "frog.png", 50, "#30d158"],
@@ -314,13 +329,37 @@
 
         const track = document.getElementById('roulette-track');
         const spinBtn = document.getElementById('spin-button');
-        const caseBlock = document.getElementById('case-block');
         const rewardBlock = document.getElementById('reward-block');
         const balanceDisplay = document.getElementById('balance-display');
+        const cardWidth = 90;
 
-        const cardWidth = 90; // Ширина карточки в пикселях
+        // 3. Подгружаем баланс из Firebase
+        const userRef = database.ref('users/' + userId);
+        userRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.balance !== undefined) {
+                balance = data.balance;
+            } else {
+                // Если пользователя еще нет в базе, создаем его профиль
+                balance = 1000;
+                userRef.set({
+                    username: firstName,
+                    balance: balance
+                });
+            }
+            balanceDisplay.innerText = balance;
+            
+            // Убираем загрузочный экран и активируем кнопку
+            document.getElementById('loading-overlay').style.display = 'none';
+            spinBtn.disabled = false;
+            spinBtn.innerText = "Испытать удачу";
+        });
 
-        // Наполнение рулетки перед стартом
+        // Функция синхронизации баланса с Firebase
+        function updateFirebaseBalance() {
+            userRef.update({ balance: balance });
+        }
+
         function setupRoulette() {
             track.innerHTML = '';
             for (let i = 0; i < 50; i++) {
@@ -336,16 +375,15 @@
             }
         }
 
-        // Функция запуска анимации
         function startSpin() {
             if (balance < spinCost) {
                 tg.HapticFeedback.notificationOccurred('error');
-                alert("Недостаточно монет для открытия кейса!");
+                alert("Недостаточно монет!");
                 return;
             }
 
             balance -= spinCost;
-            updateBalanceDisplay();
+            updateFirebaseBalance(); // Сохраняем списание в Firebase
             
             spinBtn.disabled = true;
             rewardBlock.style.display = 'none';
@@ -353,11 +391,10 @@
 
             track.style.transition = 'none';
             track.style.transform = 'translateX(0px)';
-            
             setupRoulette();
 
             setTimeout(() => {
-                const winIndex = 35; // Предмет, на котором остановится рулетка
+                const winIndex = 35;
                 const winItem = pool[Math.floor(Math.random() * pool.length)];
                 lastWonItem = winItem;
 
@@ -377,17 +414,13 @@
 
                 setTimeout(() => {
                     tg.HapticFeedback.notificationOccurred('success');
-                    
-                    // Обновляем окно выигрыша новой картинкой
                     document.getElementById('reward-image').src = winItem[1];
                     document.getElementById('reward-name').innerText = winItem[0];
                     document.getElementById('reward-card').style.borderColor = winItem[3];
                     document.getElementById('sell-button-text').innerText = `Продать за ${winItem[2]} 🪙`;
-                    
                     rewardBlock.style.display = 'block';
                     spinBtn.disabled = false;
                 }, 4100);
-
             }, 50);
         }
 
@@ -400,19 +433,14 @@
         function sellItem() {
             if (!lastWonItem) return;
             balance += lastWonItem[2];
-            updateBalanceDisplay();
+            updateFirebaseBalance(); // Сохраняем продажу в Firebase
             tg.HapticFeedback.notificationOccurred('success');
-            alert(`Предмет успешно продан за ${lastWonItem[2]} монет!`);
+            alert(`Успешно продано за ${lastWonItem[2]} монет!`);
             rewardBlock.style.display = 'none';
             lastWonItem = null;
-        }
-
-        function updateBalanceDisplay() {
-            balanceDisplay.innerText = balance;
         }
 
         setupRoulette();
     </script>
 </body>
 </html>
-
