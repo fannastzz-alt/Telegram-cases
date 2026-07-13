@@ -247,20 +247,47 @@
         .btn-secondary { background: #1c1c24; border: 1px solid #2d2d38; width: auto; padding: 8px 16px; font-size: 0.85rem; margin: 0; float: left; box-shadow: none; }
 
         /* Обновленная рулетка с визуальным увеличением */
-        .roulette-container {
-            background: #121216;
-            border: 1px solid #1f1f24;
-            border-radius: 20px;
-            margin: 25px 0; 
-            position: relative;
-            overflow: hidden;
-            height: 95px; 
-            display: flex;
-            align-items: center;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
-            transform: scale(1.15);
-            transform-origin: center;
-        }
+        .roulettes-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    margin-top: 20px;
+}
+        .roulette-wrapper-mini {
+    width: 280px; 
+    height: 80px;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid #38bdf8;
+    background: #121216;
+    border-radius: 12px;
+}
+
+.roulette-tape-mini {
+    display: flex;
+    position: absolute;
+    left: 0;
+    /* Это нужно для анимации */
+    will-change: transform;
+}
+
+.roulette-item-mini {
+    width: 80px; 
+    height: 80px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1e1e24;
+}
+
+.roulette-item-mini img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+}
         .roulette-container::before {
             content: '';
             position: absolute;
