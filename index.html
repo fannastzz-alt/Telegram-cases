@@ -55,14 +55,14 @@
             padding-bottom: 20px;
         }
         
-        /* Стили для картинок кейсов в главном меню */
+        /* Стили для увеличенных картинок кейсов в главном меню */
         .case-card-img {
             width: 100%;
-            max-width: 110px; /* Идеальный размер для сетки в 2 колонки */
-            height: 90px;     /* Фиксированная высота для ровной сетки */
+            max-width: 140px; /* Увеличили ширину, чтобы кейс стал больше */
+            height: 120px;    /* Увеличили высоту для сочности */
             object-fit: contain;
-            margin: 0 auto 10px auto;
-            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+            margin: 5px auto 12px auto;
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5)); /* Чуть углубили тень для объема */
             transition: transform 0.2s ease;
         }
         .case-card:active .case-card-img {
