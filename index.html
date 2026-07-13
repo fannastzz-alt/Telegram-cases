@@ -143,18 +143,22 @@
         .btn:disabled { background: #2c2c35; color: #6e6e73; box-shadow: none; }
         .btn-secondary { background: #1c1c24; border: 1px solid #2d2d38; width: auto; padding: 8px 16px; font-size: 0.85rem; margin: 0; float: left; box-shadow: none; }
 
-        /* Обновленная рулетка с фиксированными старыми размерами для JS */
+        /* Обновленная рулетка с визуальным увеличением */
         .roulette-container {
             background: #121216;
             border: 1px solid #1f1f24;
             border-radius: 20px;
-            margin: 20px 0;
+            margin: 25px 0; /* Немного увеличили отступы вокруг рулетки */
             position: relative;
             overflow: hidden;
-            height: 95px; /* Возвращаем старую высоту */
+            height: 95px; 
             display: flex;
             align-items: center;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+            
+            /* Вот этот трюк: увеличиваем рулетку визуально в 1.15 раз */
+            transform: scale(1.15);
+            transform-origin: center;
         }
         .roulette-container::before {
             content: '';
@@ -171,24 +175,24 @@
         }
         .roulette-track { display: flex; position: absolute; left: 0; transform: translate3d(0px, 0px, 0px); will-change: transform; }
         .roulette-item {
-            width: 80px; /* Строго возвращаем 80px, как было в старых стилях */
-            height: 75px; /* Строго возвращаем 75px */
+            width: 80px; /* Физический размер для JS остается старым */
+            height: 75px; 
             background: #1c1c24;
             border: 1px solid #2d2d38;
-            margin: 0 3px; /* Строго возвращаем отступ 3px */
-            border-radius: 16px;
+            margin: 0 3px; 
+            border-radius: 14px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 0.75rem;
-            padding: 6px;
+            font-size: 0.72rem; /* Слегка уменьшил шрифт, чтобы текст не вылезал при увеличении */
+            padding: 4px;
             text-align: center;
             flex-shrink: 0;
         }
         .roulette-item img { 
-            width: 40px !important; /* Возвращаем размер картинок 40px */
-            height: 40px !important; 
+            width: 42px !important; 
+            height: 42px !important; 
             object-fit: contain; 
             margin-bottom: 2px; 
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
