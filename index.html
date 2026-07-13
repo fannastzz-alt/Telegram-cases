@@ -54,6 +54,21 @@
             gap: 16px;
             padding-bottom: 20px;
         }
+        
+        /* Стили для картинок кейсов в главном меню */
+        .case-card-img {
+            width: 100%;
+            max-width: 110px; /* Идеальный размер для сетки в 2 колонки */
+            height: 90px;     /* Фиксированная высота для ровной сетки */
+            object-fit: contain;
+            margin: 0 auto 10px auto;
+            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+            transition: transform 0.2s ease;
+        }
+        .case-card:active .case-card-img {
+            transform: scale(1.05); /* Легкий интерактивный зум при тапе */
+        }
+        
         .case-card {
             background: #121216;
             border: 1px solid #1f1f24;
@@ -590,7 +605,12 @@
             const caseInfo = CASE_CONFIG[key];
             const card = document.createElement("div");
             card.className = "case-card";
+            
+            // Проверяем: если картинки нет, ставим стандартную иконку коробки
+            const caseImgSrc = caseInfo.image || "https://i.ibb.co/365879/image.jpg"; 
+
             card.innerHTML = `
+                <img src="${caseImgSrc}" alt="${caseInfo.name}" class="case-card-img">
                 <h3>${caseInfo.name}</h3>
                 <div class="case-cost">${caseInfo.cost > 0 ? formatStars(caseInfo.cost) + " ⭐" : "Бесплатно"}</div>
             `;
