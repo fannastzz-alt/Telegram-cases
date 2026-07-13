@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Telegram Cases</title>
+    <!-- 1. ПОДКЛЮЧАЕМ TELEGRAM И SUPABASE SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         :root {
             --bg-color: #0e1621;
@@ -284,7 +288,6 @@
             opacity: 0.6;
         }
 
-        /* Список шансов содержимого кейса */
         .case-odds-container {
             width: 100%;
             max-width: 360px;
@@ -596,7 +599,7 @@
     <header>
         <div class="user-badge">
             <div class="user-avatar" id="header-avatar">U</div>
-            <div class="user-name" id="header-username">User</div>
+            <div class="user-name" id="header-username">Загрузка...</div>
         </div>
         <div class="balance-display">
             <span class="star-icon">⭐</span>
@@ -605,12 +608,10 @@
     </header>
 
     <div class="content-area">
-        <!-- Вкладка: Кейсы -->
         <div id="cases-tab" class="tab-content active">
             <div class="cases-grid" id="cases-list-container"></div>
         </div>
 
-        <!-- Вкладка: Инвентарь -->
         <div id="inventory-tab" class="tab-content">
             <div class="inventory-header">
                 <div class="inventory-stats" id="inv-count-label">Предметов: 0</div>
@@ -619,11 +620,10 @@
             <div class="inventory-grid" id="inventory-items-container"></div>
         </div>
 
-        <!-- Вкладка: Профиль -->
         <div id="profile-tab" class="tab-content">
             <div class="profile-container">
                 <div class="profile-avatar" id="prof-avatar">U</div>
-                <div class="profile-name" id="prof-username">User</div>
+                <div class="profile-name" id="prof-username">Загрузка...</div>
                 <div class="stats-list">
                     <div class="stats-row">
                         <span class="stats-label">Всего открыто кейсов:</span>
@@ -638,7 +638,6 @@
         </div>
     </div>
 
-    <!-- Экран рулетки -->
     <div id="roulette-screen">
         <button class="back-button" onclick="closeRouletteScreen()">← Назад к кейсам</button>
         <div class="roulette-case-title" id="active-case-title">📦 Бесплатный кейс</div>
@@ -650,7 +649,6 @@
 
         <button class="action-button" id="roll-button" onclick="startCaseRoll()">Открыть кейс</button>
 
-        <!-- Список шансов содержимого кейса -->
         <div class="case-odds-container">
             <div class="odds-header">Содержимое и шансы выпадения:</div>
             <div id="odds-items-list"></div>
@@ -670,7 +668,6 @@
     </div>
 </div>
 
-<!-- Модалка выигрыша -->
 <div id="win-modal">
     <div class="win-content">
         <div class="win-label">Вы получили</div>
@@ -682,8 +679,17 @@
 </div>
 
 <script>
+    // ==========================================
+    // НАСТРОЙКА SUPABASE (Замените на свои ключи)
+    // ==========================================
+    const SUPABASE_URL = "https://nfqishqrigetyvnymzss.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_9y2KDUKbDFpRnnGKJA-udg_gZvu7fQk";
+    
+    const supabase = (SUPABASE_URL !== "ВАШ_SUPABASE_URL") ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
     const DEFAULT_IMG = "https://via.placeholder.com/150/121216/38bdf8?text=Item";
 
+    // База предметов
     const ITEMS = {
         'Сердце': {price: 15, img: "https://i.ibb.co.com/600jKJBY/Screenshot-20260713-032932-removebg-preview.png"}, 
         'Роза': {price: 25, img: "https://i.ibb.co.com/5gXCWBG8/Screenshot-20260713-032917-removebg-preview.png"}, 
@@ -779,6 +785,7 @@
         'Rare Bird (Amber Toucan)': {price: 3625000, img: DEFAULT_IMG}
     };
 
+    // Конфиг кейсов
     const CASE_CONFIG = {
         'free': { 
             name: "📦 Бесплатный кейс", 
@@ -848,6 +855,8 @@
         }
     };
 
+    // Данные пользователя (Берутся из Telegram или генерируются UUID)
+    let tgUser = { id: "test_user_id", username: "LocalTester" };
     let userBalance = 0; // Изначально дается 0 звезд
     let inventory = {};      
     let isRolling = false;
@@ -856,6 +865,7 @@
     let statsCasesOpened = 0;
     let statsTotalEarned = 0;
 
+    // Вспомогательные утилиты
     function formatStars(num) {
         if (!num && num !== 0) return "0";
         let absNum = Math.abs(num);
@@ -874,18 +884,128 @@
         document.getElementById('balance-value').textContent = formatStars(userBalance);
     }
 
-    function initUser() {
-        const nicknames = ['TonWhale', 'StarsHunter', 'CryptoHustler', 'PavelFan', 'GoldDigger'];
-        const randomNick = nicknames[Math.floor(Math.random() * nicknames.length)] + '#' + Math.floor(1000 + Math.random() * 9000);
-        
-        document.getElementById('header-username').textContent = randomNick;
-        document.getElementById('prof-username').textContent = randomNick;
-        document.getElementById('header-avatar').textContent = randomNick[0];
-        document.getElementById('prof-avatar').textContent = randomNick[0];
-        
+    // ==========================================
+    // СИНХРОНИЗАЦИЯ С SUPABASE И TELEGRAM
+    // ==========================================
+    async function initUserAndDB() {
+        // Проверяем Telegram WebApp
+        if (window.Telegram && window.Telegram.WebApp) {
+            const tg = window.Telegram.WebApp;
+            tg.ready();
+            tg.expand();
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                tgUser.id = tg.initDataUnsafe.user.id.toString();
+                tgUser.username = tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name || "User";
+            }
+        }
+
+        // Если нет TG, но мы тестируем в обычном браузере — создаем UUID
+        if (tgUser.id === "test_user_id") {
+            let localId = localStorage.getItem('local_id');
+            if(!localId) {
+                localId = 'usr_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('local_id', localId);
+            }
+            tgUser.id = localId;
+            tgUser.username = "Игрок_" + localId.slice(4, 8);
+        }
+
+        // Выводим имя на экран
+        document.getElementById('header-username').textContent = tgUser.username;
+        document.getElementById('prof-username').textContent = tgUser.username;
+        document.getElementById('header-avatar').textContent = tgUser.username[0].toUpperCase();
+        document.getElementById('prof-avatar').textContent = tgUser.username[0].toUpperCase();
+
+        if (supabase) {
+            await loadUserDataFromSupabase();
+        } else {
+            // Если Supabase не подключен, берем данные из LocalStorage браузера
+            loadLocalBackup();
+        }
+    }
+
+    async function loadUserDataFromSupabase() {
+        try {
+            const { data, error } = await supabase
+                .from('users_data')
+                .select('*')
+                .eq('id', tgUser.id)
+                .single();
+
+            if (error && error.code === 'PGRST116') {
+                // Пользователь не найден, создаем новую запись в БД
+                await createNewUserInSupabase();
+            } else if (data) {
+                userBalance = data.balance || 0;
+                inventory = data.inventory || {};
+                statsCasesOpened = data.cases_opened || 0;
+                statsTotalEarned = data.total_earned || 0;
+            }
+        } catch(e) {
+            console.error("Ошибка при работе с Supabase, берем локальные данные:", e);
+            loadLocalBackup();
+        }
         updateBalanceDisplay();
     }
 
+    async function createNewUserInSupabase() {
+        const newUser = {
+            id: tgUser.id,
+            username: tgUser.username,
+            balance: 0, // 0 звезд на старте
+            inventory: {},
+            cases_opened: 0,
+            total_earned: 0
+        };
+        await supabase.from('users_data').insert([newUser]);
+    }
+
+    async function saveUserData() {
+        // Сначала всегда дублируем в локальное хранилище для надежности
+        localStorage.setItem(`save_${tgUser.id}`, JSON.stringify({
+            balance: userBalance,
+            inventory: inventory,
+            cases_opened: statsCasesOpened,
+            total_earned: statsTotalEarned
+        }));
+
+        if (supabase) {
+            try {
+                await supabase
+                    .from('users_data')
+                    .update({
+                        balance: userBalance,
+                        inventory: inventory,
+                        cases_opened: statsCasesOpened,
+                        total_earned: statsTotalEarned
+                    })
+                    .eq('id', tgUser.id);
+            } catch(e) {
+                console.error("Не удалось отправить сейв в Supabase:", e);
+            }
+        }
+    }
+
+    function loadLocalBackup() {
+        const backup = localStorage.getItem(`save_${tgUser.id}`);
+        if(backup) {
+            const parsed = JSON.parse(backup);
+            userBalance = parsed.balance || 0;
+            inventory = parsed.inventory || {};
+            statsCasesOpened = parsed.cases_opened || 0;
+            statsTotalEarned = parsed.total_earned || 0;
+        } else {
+            // Совсем пустой старт
+            userBalance = 0;
+            inventory = {};
+            statsCasesOpened = 0;
+            statsTotalEarned = 0;
+        }
+                           }
+    
+    // ==========================================
+    // ЛОГИКА ИГРЫ И РУЛЕТКИ
+    // ==========================================
     function renderCases() {
         const container = document.getElementById('cases-list-container');
         container.innerHTML = '';
@@ -948,8 +1068,6 @@
         oddsList.innerHTML = '';
 
         const caseData = CASE_CONFIG[caseKey];
-        
-        // Сортируем предметы по убыванию шанса выпадения
         const sortedItems = [...caseData.items].sort((a, b) => b[1] - a[1]);
 
         sortedItems.forEach(([name, chance]) => {
@@ -1063,12 +1181,15 @@
         track.style.transition = 'transform 4s cubic-bezier(0.1, 0.6, 0.1, 1)';
         track.style.transform = `translateX(${finalScrollX}px)`;
 
-        setTimeout(() => {
+        setTimeout(async () => {
             inventory[winItemName] = (inventory[winItemName] || 0) + 1;
             statsCasesOpened++;
 
             showWinModal(winItemName);
             isRolling = false;
+            
+            // Сохраняем состояние после открытия кейса
+            await saveUserData();
         }, 4100);
     }
 
@@ -1121,7 +1242,7 @@
         document.getElementById('inv-count-label').textContent = `Предметов: ${totalItemsCount}`;
     }
 
-    function sellAllItems() {
+    async function sellAllItems() {
         let incomingProfit = 0;
         let itemsSold = 0;
 
@@ -1146,6 +1267,9 @@
         updateBalanceDisplay();
         renderInventory();
 
+        // Сохраняем состояние после продажи
+        await saveUserData();
+
         alert(`Успешно продано предметов: ${itemsSold} шт. на сумму ⭐ ${formatStars(incomingProfit)}!`);
     }
 
@@ -1154,8 +1278,8 @@
         document.getElementById('stat-total-earned').textContent = `⭐ ${formatStars(statsTotalEarned)}`;
     }
 
-    window.onload = () => {
-        initUser();
+    window.onload = async () => {
+        await initUserAndDB();
         renderCases();
     };
 </script>
