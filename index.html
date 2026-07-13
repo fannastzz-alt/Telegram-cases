@@ -325,19 +325,19 @@
     let isRolling = false;
 
     // ЗАГЛУШКА: Ссылка на прозрачную серую картинку, если реальное фото не загрузилось
-    const DEFAULT_IMG = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'><rect width='40' height='40' fill='%23334155'/></svg>";
-
+    const DEFAULT_IMG = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjMzM0MTU1Ii8+PC9zdmc+";
     // ВАЖНО: Вместо "DEFAULT_IMG" тебе нужно вставить свои ссылки на картинки предметов!
     const ITEMS = {
+        
         'Сердце': {price: 15, img: "https://telegram.org/img/website_icon.png"}, 
-        'Роза': {price: 25, img: "https://ibb.co.com/MxyKDMZV"}, 
-        'Ракета': {price: 50, img: "https://ibb.co.com/sp7zCVLz"}, 
-        'Цветы': {price: 50, img: "https://ibb.co.com/pr0TcRQH"}, 
-        'Шапка шута': {price: 500, img: "https://ibb.co.com/ch6fh6fp"}, 
-        'Снуп Догг': {price: 425, img: "https://ibb.co.com/gZ2Qxk5g"}, 
-        'Кольцо': {price: 100, img: "https://ibb.co.com/Kzqcc0LG"}, 
-        'Алмаз': {price: 100, img: "https://ibb.co.com/CTffFXp"}, 
-        'Лол-поп': {price: 325, img: "https://ibb.co.com/JFjTQ4G3"},
+        'Роза': {price: 25, img: "https://i.ibb.co.com/5gXCWBG8/Screenshot-20260713-032917-removebg-preview.png"}, 
+        'Ракета': {price: 50, img: "https://i.ibb.co.com/9mPShrRS/Screenshot-20260713-033022-removebg-preview.png"}, 
+        'Цветы': {price: 50, img: "https://i.ibb.co.com/JFBTVyqY/Screenshot-20260713-033633-removebg-preview.png"}, 
+        'Шапка шута': {price: 500, img: "https://i.ibb.co.com/SwtYwtY1/Screenshot-20260713-033035-removebg-preview.png"}, 
+        'Снуп Догг': {price: 425, img: "https://i.ibb.co.com/CKc4fRk0/Screenshot-20260713-033008-removebg-preview.png"}, 
+        'Кольцо': {price: 100, img: "https://i.ibb.co.com/k68VVH9y/Screenshot-20260713-032904-removebg-preview.png"}, 
+        'Алмаз': {price: 100, img: "https://i.ibb.co.com/Q144Gq7/Screenshot-20260713-032946-removebg-preview.png"}, 
+        'Лол-поп': {price: 325, img: "https://i.ibb.co.com/6J0SBxTX/Screenshot-20260713-032848-removebg-preview.png"},
         'Лунная змея': {price: 350, img: DEFAULT_IMG}, 
         'Гаджет Тамы': {price: 450, img: DEFAULT_IMG}, 
         'Праздничный напиток': {price: 450, img: DEFAULT_IMG}, 
