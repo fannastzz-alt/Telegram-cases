@@ -418,18 +418,23 @@
 </div>
 
 <script>
-    const SUPABASE_URL = "https://nfqishqrigetyvnymzss.supabase.co"; 
-    const SUPABASE_KEY = "sb_publishable_9y2KDUKbDFpRnnGKJA-udg_gZvu7fQk"; 
+    // --- ИНИЦИАЛИЗАЦИЯ И ЛОГИКА ---
+const SUPABASE_URL = "https://nfqishqrigetyvnymzss.supabase.co";
+const SUPABASE_KEY = "sb_publishable_9y2KDUKbDFpRnnGKJA-udg_gZvu7fQk";
 
-    let dbClient = null;
-    try {
-        if (window.supabase && typeof window.supabase.createClient === 'function') {
-            dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        }
-    } catch(e) {
-        console.error("Ошибка создания клиента Supabase:", e);
+let dbClient = null;
+try {
+    if (window.supabase && typeof window.supabase.createClient === 'function') {
+        dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     }
+} catch(e) {
+    console.error("Supabase init error:", e);
+}
 
+// ... (далее идет остальной ваш код)
+// Если ошибка повторяется, проверьте, нет ли у вас в файле 
+// двух блоков <script>...</script>. 
+// Оставьте только один блок <script> в самом конце файла перед </body>.
     let userId = "123456789"; 
     let username = "Gamer";
     let userBalance = 5000; // Стартовый баланс по умолчанию
