@@ -7,6 +7,87 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* Контейнер, чтобы кнопки встали красиво в ряд */
+.open-buttons-container {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    width: 100%;
+    max-width: 450px;
+    margin: 15px auto;
+}
+
+/* Стили для кнопки x5 */
+.btn-x5 {
+    background: #f59e0b !important; /* Оранжевый/золотой цвет */
+    color: #ffffff !important;
+}
+.btn-x5:hover {
+    background: #d97706 !important;
+}
+
+/* Отключение кнопок при кручении */
+.btn:disabled, .btn-x5:disabled {
+    background: #4b5563 !important;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Стили для режима мульти-рулетки (x5) */
+.roulettes-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+}
+
+.roulette-wrapper-mini {
+    position: relative;
+    width: 100%;
+    height: 80px;
+    overflow: hidden;
+    border: 2px solid #38bdf8;
+    background: #121216;
+    border-radius: 12px;
+}
+
+.roulette-wrapper-mini::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: #ff4a4a;
+    z-index: 10;
+    box-shadow: 0 0 10px #ff4a4a;
+    transform: translateX(-50%);
+}
+
+.roulette-tape-mini {
+    display: flex;
+    transition: transform 4s cubic-bezier(0.15, 0.85, 0.35, 1);
+    will-change: transform;
+}
+
+.roulette-item-mini {
+    min-width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1e1e24;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.roulette-item-mini img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+}
+        
         * { box-sizing: border-box; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
         body {
             background-color: #0a0a0c; /* Угольно-черный фон как на референсах */
@@ -286,7 +367,10 @@
                 <div class="roulette-track" id="roulette-track"></div>
             </div>
             
-            <button class="btn" id="open-btn" onclick="triggerOpenCase()">Открыть кейс</button>
+            <div class="open-buttons-container">
+    <button class="btn" id="open-btn" onclick="startOpening(1)">Открыть кейс</button>
+    <button class="btn btn-x5" id="open-btn-x5" onclick="startOpening(5)">Открыть x5</button>
+</div>
 
             <div class="loot-info-section">
                 <h3 style="font-size: 1rem; color: #94a3b8; padding-left: 4px; margin-bottom: 8px;">Содержимое кейса:</h3>
@@ -309,7 +393,7 @@
         <div class="coming-soon">
             <div style="font-size: 3rem; margin-bottom: 10px;">🛠️</div>
             <p style="font-size: 1.1rem; color: #f1f5f9; margin: 5px 0;">Раздел находится в разработке</p>
-            <p style="font-size: 0.85rem;">Скоро сюда добавится система промокодов, ежедневные награды и статистика кликов!</p>
+            <p style="font-size: 0.85rem;">Скоро сюда добавится система промокодов, ежедневные награды и лидерборды!</p>
         </div>
     </div>
 
@@ -332,6 +416,39 @@
 <script>
     const SUPABASE_URL = "https://nfqishqrigetyvnymzss.supabase.co"; 
     const SUPABASE_KEY = "sb_publishable_9y2KDUKbDFpRnnGKJA-udg_gZvu7fQk"; 
+
+    async function startOpening(count = 1) {
+    if (isRolling) return; 
+    
+    const caseInfo = CASE_CONFIG[selectedCaseKey];
+    const totalCost = caseInfo.cost * count;
+
+    // 1. Проверяем баланс (используй переменную твоего баланса, например, userBalance)
+    if (typeof userBalance !== 'undefined' && userBalance < totalCost) {
+        alert(`Недостаточно ⭐! Требуется ${formatStars(totalCost)} ★`);
+        return;
+    }
+
+    // 2. Списываем баланс локально и в базе данных Supabase
+    if (typeof userBalance !== 'undefined') {
+        userBalance -= totalCost;
+        if (typeof updateBalanceOnUI === 'function') updateBalanceOnUI();
+        if (typeof saveBalanceToSupabase === 'function') await saveBalanceToSupabase(userBalance);
+    }
+
+    // 3. Блокируем обе кнопки на время кручения
+    document.getElementById("open-btn").disabled = true;
+    document.getElementById("open-btn-x5").disabled = true;
+
+    // 4. Запускаем анимацию
+    if (count === 1) {
+        // Твоя стандартная функция открытия одного кейса
+        triggerOpenCase(); 
+    } else {
+        // Логика запуска пяти рулеток
+        startMultiRoulette(5); 
+    }
+}
     
     let dbClient = null;
     try {
@@ -675,21 +792,30 @@
     }
 
     function openCaseScreen(key) {
-        if(isRolling) return;
-        selectedCaseKey = key;
-        const caseInfo = CASE_CONFIG[key];
-        
-        document.getElementById("menu-screen").style.display = "none";
-        document.getElementById("opening-screen").style.display = "block";
-        document.getElementById("current-case-name").innerText = caseInfo.name;
-        document.getElementById("open-btn").disabled = false;
-        document.getElementById("open-btn").innerText = `Открыть за ${formatStars(caseInfo.cost)} ⭐`;
+    if (isRolling) return;
+    selectedCaseKey = key;
+    const caseInfo = CASE_CONFIG[key];
 
-        generateLootList(caseInfo.items);
-        resetRoulette(caseInfo.items);
-        
-        document.getElementById("bottom-tab-bar").style.display = "none";
-    }
+    document.getElementById("menu-screen").style.display = "none";
+    document.getElementById("opening-screen").style.display = "block";
+    document.getElementById("current-case-name").innerText = caseInfo.name;
+    
+    // Получаем обе кнопки
+    const btnX1 = document.getElementById("open-btn");
+    const btnX5 = document.getElementById("open-btn-x5");
+    
+    btnX1.disabled = false;
+    btnX5.disabled = false;
+
+    // Подставляем цены (для x1 и умноженную на 5 для x5)
+    btnX1.innerText = `Открыть за ${formatStars(caseInfo.cost)} ★`;
+    btnX5.innerText = `Открыть x5 за ${formatStars(caseInfo.cost * 5)} ★`;
+
+    generateLootList(caseInfo.items);
+    resetRoulette(caseInfo.items);
+
+    document.getElementById("bottom-tab-bar").style.display = "none";
+}
 
     function backToMenu() {
         if(isRolling) return;
@@ -820,7 +946,102 @@
                 alert(`Вы выбили: ${winningItem}!`);
             }
         }, 4200);
+
+        function startMultiRoulette(count = 5) {
+    isRolling = true;
+    const currentCase = CASE_CONFIG[selectedCaseKey];
+    
+    // Скрываем стандартную одиночную рулетку на время открытия x5
+    const singleRoulette = document.getElementById("roulette-track");
+    if (singleRoulette) singleRoulette.style.opacity = "0";
+
+    // Ищем или создаем контейнер для мульти-рулетки внутри "roulette-container"
+    const rouletteContainer = document.querySelector(".roulette-container");
+    
+    // Удаляем старый мульти-контейнер, если он остался
+    const oldMulti = document.querySelector(".roulettes-container");
+    if (oldMulti) oldMulti.remove();
+
+    const roulettesWrap = document.createElement("div");
+    roulettesWrap.className = "roulettes-container";
+    rouletteContainer.appendChild(roulettesWrap);
+
+    const winItems = [];
+
+    // Генерируем 5 мини-рулеток
+    for (let r = 0; r < count; r++) {
+        // Здесь должна быть твоя функция выбора случайного предмета по шансам
+        // Если у тебя функция выбора предмета называется иначе, замени её здесь:
+        const winItem = getRandomItem(currentCase.items); 
+        winItems.push(winItem);
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "roulette-wrapper-mini";
+
+        const tape = document.createElement("div");
+        tape.className = "roulette-tape-mini";
+        tape.id = `tape-${r}`;
+
+        // Наполняем ленту (35 предметов для красивой прокрутки)
+        let tapeHTML = "";
+        for (let i = 0; i < 35; i++) {
+            const item = (i === 30) ? winItem : getRandomItem(currentCase.items);
+            // Получаем картинку предмета (или ставим заглушку)
+            const itemImg = typeof getItemImage === 'function' ? getItemImage(item[0]) : "https://i.ibb.co/365879/image.jpg";
+
+            tapeHTML += `
+                <div class="roulette-item-mini">
+                    <img src="${itemImg}" alt="${item[0]}">
+                </div>
+            `;
+        }
+
+        tape.innerHTML = tapeHTML;
+        wrapper.appendChild(tape);
+        roulettesWrap.appendChild(wrapper);
+
+        // Запускаем анимацию прокрутки с легким каскадным сдвигом
+        setTimeout(() => {
+            const itemWidth = 80; // Ширина элемента в CSS
+            const stopPosition = (30 * itemWidth) - (wrapper.offsetWidth / 2) + (itemWidth / 2);
+            const randomShift = Math.floor(Math.random() * 30) - 15; // Для естественности остановки
+            
+            tape.style.transform = `translateX(-${stopPosition + randomShift}px)`;
+        }, r * 150);
     }
+
+    // Ждем окончания анимации (4 секунды + задержки)
+    setTimeout(() => {
+        isRolling = false;
+        
+        // Показываем выигрыш (замени на свою функцию отображения, например, модальное окно)
+        alert(`Вы выбили:\n${winItems.map(item => `• ${item[0]}`).join('\n')}`);
+        
+        // Твоя функция сохранения выигранных предметов в базу данных
+        if (typeof saveWinItemsToDatabase === 'function') {
+            saveWinItemsToDatabase(winItems);
+        }
+
+        // Возвращаем видимость обычной рулетке
+        if (singleRoulette) singleRoulette.style.opacity = "1";
+        roulettesWrap.remove(); // Удаляем временные 5 рулеток
+
+        // Разблокируем кнопки
+        document.getElementById("open-btn").disabled = false;
+        document.getElementById("open-btn-x5").disabled = false;
+    }, 4500 + (count * 150));
+}
+
+// Вспомогательная функция выбора случайного предмета (если у тебя её нет)
+function getRandomItem(items) {
+    const totalChance = items.reduce((sum, item) => sum + item[1], 0);
+    let random = Math.random() * totalChance;
+    for (const item of items) {
+        if (random < item[1]) return item;
+        random -= item[1];
+    }
+    return items[0];
+}
 
     window.addEventListener('DOMContentLoaded', loadUserData);
 </script>
