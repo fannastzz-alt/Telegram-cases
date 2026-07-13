@@ -2,665 +2,516 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Telegram Stars Case Opener</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case Opening Simulator</title>
+    <!-- Подключение Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Контейнер, чтобы кнопки встали красиво в ряд */
-        .open-buttons-container {
+        :root {
+            --bg-color: #1a1a1a;
+            --panel-color: #262626;
+            --accent-color: #ffaa00;
+            --text-color: #ffffff;
+            --text-muted: #aaaaaa;
+            --border-color: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 10px;
             display: flex;
-            gap: 12px;
             justify-content: center;
+        }
+
+        .app-container {
             width: 100%;
-            max-width: 450px;
-            margin: 15px auto;
+            max-width: 480px;
+            background: var(--panel-color);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
+            position: relative;
+            min-height: 90vh;
         }
 
-        /* Стили для кнопки x5 */
-        .btn-x5 {
-            background: #f59e0b !important; /* Оранжевый/золотой цвет */
-            color: #ffffff !important;
-        }
-        .btn-x5:hover {
-            background: #d97706 !important;
-        }
-
-        /* Отключение кнопок при кручении */
-        .btn:disabled, .btn-x5:disabled {
-            background: #4b5563 !important;
-            cursor: not-allowed;
-            opacity: 0.6;
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        /* Стили для режима мульти-рулетки (x5) */
-        .roulettes-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
-    margin-top: 20px;
-}
-.roulette-wrapper-mini {
-    width: 280px;
-    height: 80px;
-    overflow: hidden;
-    position: relative;
-    border: 2px solid #38bdf8;
-    background: #121216;
-    border-radius: 12px;
-}
-.roulette-tape-mini {
-    display: flex;
-    position: absolute;
-    left: 0;
-}
-.roulette-item-mini {
-    width: 80px;
-    height: 80px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #1e1e24;
-}
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-        .roulette-item-mini img {
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #444;
+            object-fit: cover;
+        }
+
+        .username {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .balance {
+            background: rgba(255, 170, 0, 0.1);
+            color: var(--accent-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            border: 1px solid rgba(255, 170, 0, 0.2);
+        }
+
+        /* Экраны */
+        .screen {
+            display: none;
+        }
+
+        #menu-screen {
+            display: block;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Сетка кейсов */
+        .cases-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .case-card {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .case-card:active {
+            transform: scale(0.98);
+        }
+
+        .case-card:hover {
+            border-color: var(--accent-color);
+        }
+
+        .case-card img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 8px;
+        }
+
+        .case-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .case-price {
+            color: var(--accent-color);
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        /* Рулетка обычная */
+        .roulette-container {
+            position: relative;
+            width: 100%;
+            height: 110px;
+            background: #151515;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .roulette-line {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 100%;
+            background: var(--accent-color);
+            z-index: 10;
+            box-shadow: 0 0 8px var(--accent-color);
+        }
+
+        .roulette-track {
+            display: flex;
+            align-items: center;
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            padding: 0 10px;
+            will-change: transform;
+        }
+
+        .roulette-item {
+            width: 80px;
+            height: 90px;
+            background: #2a2a2a;
+            margin: 0 3px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6px;
+            border: 1px solid #3a3a3a;
+            flex-shrink: 0;
+        }
+
+        .roulette-item img {
             width: 50px;
             height: 50px;
             object-fit: contain;
         }
-        
-        * { box-sizing: border-box; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-        body {
-            background-color: #0a0a0c; /* Угольно-черный фон */
-            color: #ffffff;
-            margin: 0;
-            padding: 16px 16px 95px 16px;
-            overflow-x: hidden;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .container { max-width: 480px; margin: 0 auto; }
-        
-        /* Премиальная шапка */
-        .header {
-            background: #121216;
-            padding: 14px 18px;
-            border-radius: 20px;
-            margin-bottom: 24px;
-            border: 1px solid #1f1f24;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-        }
-        #username-display { font-size: 0.95rem; color: #8e8e93; font-weight: 500; }
-        .balance { color: #ffffff; font-weight: 700; font-size: 1.15rem; }
-        .balance span { color: #eab308; } /* Золотые звезды */
 
-        h2 { 
-            font-size: 1.4rem; 
-            margin: 20px 0 16px 0; 
-            color: #ffffff; 
-            font-weight: 700;
-            letter-spacing: -0.3px;
+        .roulette-item .name {
+            font-size: 10px;
             text-align: center;
-        }
-
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        /* Новая аккуратная сетка кейсов (2 в ряд) */
-        .case-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            padding-bottom: 20px;
-        }
-        
-        /* Стили для увеличенных картинок кейсов в главном меню */
-        .case-card-img {
+            margin-top: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             width: 100%;
-            max-width: 140px; 
-            height: 120px;    
-            object-fit: contain;
-            margin: 5px auto 12px auto;
-            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5)); 
-            transition: transform 0.2s ease;
+            color: #ddd;
         }
-        .case-card:active .case-card-img {
-            transform: scale(1.05); 
-        }
-        
-        .case-card {
-            background: #121216;
-            border: 1px solid #1f1f24;
-            border-radius: 24px;
-            padding: 20px 14px 16px 14px;
-            cursor: pointer;
+
+        /* Мульти-рулетка (x5) */
+        .roulettes-container {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            min-height: 180px;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-        }
-        .case-card:active {
-            transform: scale(0.96);
-            border-color: rgba(56, 189, 248, 0.4);
-        }
-        .case-card h3 {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin: 8px 0;
-            color: #efeff4;
-            line-height: 1.2;
-        }
-        .case-cost {
-            background: #1c1c24;
-            border: 1px solid #2d2d38;
-            color: #38bdf8;
-            font-weight: 700;
-            font-size: 0.9rem;
-            padding: 8px 0;
-            border-radius: 14px;
+            gap: 6px;
             width: 100%;
-            text-align: center;
+            height: 100%;
+            justify-content: center;
+            padding: 4px 0;
         }
 
-        /* Инвентарь */
-        .inventory-list { display: flex; flex-direction: column; gap: 10px; }
-        .inventory-empty { color: #8e8e93; text-align: center; font-size: 0.95rem; padding: 40px 0; }
-        .inventory-item-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #121216;
-            padding: 14px 16px;
-            border-radius: 18px;
-            border: 1px solid #1f1f24;
-        }
-        .inv-item-info { display: flex; align-items: center; gap: 12px; font-size: 0.95rem; font-weight: 500;}
-        .inv-item-img {
-            width: 36px !important;
-            height: 36px !important;
-            object-fit: contain;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
-        }
-        .inv-item-count { color: #38bdf8; font-weight: 700; background: rgba(56, 189, 248, 0.1); padding: 2px 8px; border-radius: 8px; font-size: 0.8rem; }
-        .btn-sell {
-            background: #10b981;
-            color: white;
-            border: none;
-            padding: 8px 14px;
-            font-size: 0.85rem;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .coming-soon { text-align: center; padding: 60px 20px; color: #8e8e93; }
-
-        /* Кнопки */
-        .btn {
-            background: #007aff;
-            color: white;
-            border: none;
-            padding: 16px 20px;
-            font-size: 1rem;
-            border-radius: 16px;
-            cursor: pointer;
-            font-weight: 700;
-            width: 100%;
-            margin-top: 10px;
-            box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3);
-            transition: all 0.2s;
-        }
-        .btn:active { transform: scale(0.98); opacity: 0.9; }
-        .btn:disabled { background: #2c2c35; color: #6e6e73; box-shadow: none; }
-        .btn-secondary { background: #1c1c24; border: 1px solid #2d2d38; width: auto; padding: 8px 16px; font-size: 0.85rem; margin: 0; float: left; box-shadow: none; }
-
-        /* Обновленная рулетка с визуальным увеличением */
-        .roulettes-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
-    margin-top: 20px;
-}
         .roulette-wrapper-mini {
-    width: 280px; 
-    height: 80px;
-    overflow: hidden;
-    position: relative;
-    border: 2px solid #38bdf8;
-    background: #121216;
-    border-radius: 12px;
-}
+            position: relative;
+            width: 100%;
+            height: 18px;
+            background: #111;
+            overflow: hidden;
+            border: 1px solid #222;
+        }
 
-.roulette-tape-mini {
-    display: flex;
-    position: absolute;
-    left: 0;
-    /* Это нужно для анимации */
-    will-change: transform;
-}
-
-.roulette-item-mini {
-    width: 80px; 
-    height: 80px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #1e1e24;
-}
-
-.roulette-item-mini img {
-    width: 50px;
-    height: 50px;
-    object-fit: contain;
-}
-        .roulette-container::before {
+        .roulette-wrapper-mini::before {
             content: '';
             position: absolute;
-            left: 50%;
             top: 0;
-            bottom: 0;
-            width: 4px;
-            background: #38bdf8;
-            z-index: 10;
+            left: 50%;
             transform: translateX(-50%);
-            box-shadow: 0 0 12px #38bdf8;
-            border-radius: 2px;
+            width: 2px;
+            height: 100%;
+            background: #ff5500;
+            z-index: 5;
         }
-        .roulette-track { display: flex; position: absolute; left: 0; transform: translate3d(0px, 0px, 0px); will-change: transform; }
-        .roulette-item {
-            width: 80px; 
-            height: 75px; 
-            background: #1c1c24;
-            border: 1px solid #2d2d38;
-            margin: 0 3px; 
-            border-radius: 14px;
+
+        .roulette-tape-mini {
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            will-change: transform;
+        }
+
+        .roulette-item-mini {
+            width: 80px;
+            height: 16px;
+            border-right: 1px solid #222;
+            display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.72rem; 
-            padding: 4px;
-            text-align: center;
+            background: #1c1c1c;
             flex-shrink: 0;
         }
-        .roulette-item img { 
-            width: 42px !important; 
-            height: 42px !important; 
-            object-fit: contain; 
-            margin-bottom: 2px; 
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
-        }
-        .roulette-item .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; color: #d1d1d6; font-weight: 500; }
 
-        /* Списки содержимого */
-        .loot-info-section { margin-top: 28px; }
-        .loot-list { background: #121216; border-radius: 20px; padding: 8px; border: 1px solid #1f1f24; }
-        .loot-item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; border-bottom: 1px solid #1f1f24; font-size: 0.9rem; }
-        .loot-item-row:last-child { border-bottom: none; }
-        .loot-name { font-weight: 500; display: flex; align-items: center; gap: 10px; color: #ffffff; }
-        .loot-name img { width: 30px !important; height: 30px !important; object-fit: contain; }
-        .loot-details { text-align: right; }
-        .loot-chance { color: #34c759; font-weight: 700; font-size: 0.85rem; }
-        .loot-price { color: #8e8e93; font-size: 0.8rem; margin-top: 2px; }
-
-        /* Нижнее меню */
-        .tab-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(18, 18, 22, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255, 255, 255, 0.06);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px)) 0;
-            z-index: 1000;
-            box-shadow: 0 -8px 32px rgba(0,0,0,0.5);
+        .roulette-item-mini img {
+            height: 14px;
+            object-fit: contain;
         }
-        .tab-button {
-            background: none;
-            border: none;
-            color: #8e8e93;
+
+        /* Кнопки действий */
+        .actions-block {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 0.75rem;
-            cursor: pointer;
-            font-weight: 600;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
             flex: 1;
-            transition: all 0.2s;
+            background: var(--accent-color);
+            color: #000;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background 0.2s, opacity 0.2s;
         }
-        .tab-button .tab-icon { font-size: 1.4rem; margin-bottom: 4px; transition: transform 0.2s; }
-        .tab-button.active { color: #ffffff; }
-        .tab-button.active .tab-icon { transform: scale(1.1); }
 
-        .clearfix::after { content: ""; clear: both; display: table; }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #444;
+            color: #fff;
+        }
+
+        /* Списки предметов / Лут / Инвентарь */
+        .loot-list, .inventory-list {
+            background: rgba(0,0,0,0.15);
+            border-radius: 12px;
+            padding: 8px;
+            max-height: 260px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .loot-item-row, .inventory-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .loot-item-row:last-child, .inventory-item-row:last-child {
+            border-bottom: none;
+        }
+
+        .loot-name, .inv-item-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .loot-name img, .inv-item-img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+
+        .loot-details {
+            text-align: right;
+        }
+
+        .loot-chance {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .loot-price {
+            font-size: 12px;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .inv-item-count {
+            color: var(--accent-color);
+            font-weight: bold;
+            margin-left: 4px;
+        }
+
+        .btn-sell {
+            background: #cc3333;
+            color: #fff;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-sell:hover {
+            background: #e53935;
+        }
+
+        .inventory-empty {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+            padding: 20px 0;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <div id="username-display">Синхронизация...</div>
-        <div class="balance">Баланс: <span id="balance-value">0</span> ⭐</div>
-    </div>
-
-    <!-- ВКЛАДКА 1: КЕЙСЫ -->
-    <div id="cases-tab" class="tab-content active">
-        <div id="menu-screen">
-            <h2>📦 Выберите кейс</h2>
-            <div class="case-grid" id="case-grid-container"></div>
+<div class="app-container">
+    <!-- Шапка приложения -->
+    <header>
+        <div class="user-info">
+            <img id="user-avatar" class="avatar" src="https://via.placeholder.com/150" alt="Avatar">
+            <span id="user-name" class="username">Загрузка...</span>
         </div>
+        <div id="balance-display" class="balance">0 ★</div>
+    </header>
 
-        <div id="opening-screen" style="display: none;">
-            <div class="clearfix" style="margin-bottom: 10px;">
-                <button class="btn btn-secondary" onclick="backToMenu()">↩️ Назад</button>
-            </div>
-            <h2 id="current-case-name" style="margin-top: 5px;">Название кейса</h2>
-            
-            <div class="roulette-container">
-                <div class="roulette-track" id="roulette-track"></div>
-            </div>
-            
-            <div class="open-buttons-container">
-                <button class="btn" id="open-btn" onclick="startOpening(1)">Открыть кейс</button>
-                <button class="btn btn-x5" id="open-btn-x5" onclick="startOpening(5)">Открыть x5</button>
-            </div>
-            <div class="loot-info-section">
-                <h3 style="font-size: 1rem; color: #94a3b8; padding-left: 4px; margin-bottom: 8px;">Содержимое кейса:</h3>
-                <div class="loot-list" id="loot-list-container"></div>
-            </div>
-        </div>
-    </div>
+    <!-- ЭКРАН 1: ГЛАВНОЕ МЕНЮ (Кейсы и Инвентарь) -->
+    <div id="menu-screen" class="screen">
+        <h2>Доступные кейсы</h2>
+        <div class="cases-grid" id="cases-container"></div>
 
-    <!-- ВКЛАДКА 2: ИНВЕНТАРЬ -->
-    <div id="inventory-tab" class="tab-content">
-        <h2>🎒 Ваш инвентарь <span id="inv-total-count" style="font-size: 0.9rem; color: #64748b; font-weight: normal;">(0 шт.)</span></h2>
+        <h2>Ваш инвентарь <span id="inv-total-count" style="font-size:13px; color:gray;">(0 шт.)</span></h2>
         <div class="inventory-list" id="inventory-list-container">
-            <div class="inventory-empty">Здесь пока ничего нет. Откройте свой первый кейс!</div>
+            <div class="inventory-empty">Загрузка данных инвентаря...</div>
         </div>
     </div>
 
-    <!-- ВКЛАДКА 3: БУДУЩИЕ ФИЧИ -->
-    <div id="future-tab" class="tab-content">
-        <h2>✨ Новые возможности</h2>
-        <div class="coming-soon">
-            <div style="font-size: 3rem; margin-bottom: 10px;">🛠️</div>
-            <p style="font-size: 1.1rem; color: #f1f5f9; margin: 5px 0;">Раздел находится в разработке</p>
-            <p style="font-size: 0.85rem;">Скоро сюда добавится система промокодов, ежедневные награды и лидерборды!</p>
+    <!-- ЭКРАН 2: ПРОЦЕСС ОТКРЫТИЯ КЕЙСА -->
+    <div id="opening-screen" class="screen">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h2 id="case-title" style="margin:0;">Открытие кейса</h2>
+            <button class="btn btn-secondary" style="padding:6px 12px; font-size:12px; flex:none;" onclick="backToMenu()">Назад</button>
         </div>
-    </div>
 
-    <nav class="tab-bar" id="bottom-tab-bar">
-        <button class="tab-button active" onclick="switchTab('cases-tab')">
-            <span class="tab-icon">📦</span>
-            <span>Кейсы</span>
-        </button>
-        <button class="tab-button" onclick="switchTab('inventory-tab')">
-            <span class="tab-icon">🎒</span>
-            <span>Инвентарь</span>
-        </button>
-        <button class="tab-button" onclick="switchTab('future-tab')">
-            <span class="tab-icon">✨</span>
-            <span>Скоро</span>
-        </button>
-    </nav>
+        <!-- Контейнер рулетки -->
+        <div class="roulette-container">
+            <div class="roulette-line"></div>
+            <div id="roulette-track" class="roulette-track"></div>
+        </div>
+
+        <!-- Кнопки открытия -->
+        <div class="actions-block">
+            <button id="open-btn" class="btn" onclick="startOpening(1)">Открыть x1</button>
+            <button id="open-btn-x5" class="btn" style="background:#ff5500;" onclick="startOpening(5)">Быстрый x5</button>
+        </div>
+
+        <h2>Содержимое кейса</h2>
+        <div class="loot-list" id="loot-list-container"></div>
+    </div>
 </div>
 
 <script>
-    // --- ИНИЦИАЛИЗАЦИЯ И ЛОГИКА ---
-const SUPABASE_URL = "https://nfqishqrigetyvnymzss.supabase.co";
-const SUPABASE_KEY = "sb_publishable_9y2KDUKbDFpRnnGKJA-udg_gZvu7fQk";
-
-let dbClient = null;
-try {
-    if (window.supabase && typeof window.supabase.createClient === 'function') {
-        dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    }
-} catch(e) {
-    console.error("Supabase init error:", e);
-}
-
-// ... (далее идет остальной ваш код)
-// Если ошибка повторяется, проверьте, нет ли у вас в файле 
-// двух блоков <script>...</script>. 
-// Оставьте только один блок <script> в самом конце файла перед </body>.
-    let userId = "123456789"; 
-    let username = "Gamer";
-    let userBalance = 5000; // Стартовый баланс по умолчанию
-    let userInventory = {}; 
-    let selectedCaseKey = null;
-    let isRolling = false;
-
-    const DEFAULT_IMG = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjMzM0MTU1Ii8+PC9zdmc+";
-
+    // --- НАСТРОЙКИ И ДАННЫЕ ИГРЫ ---
     const ITEMS = {
-        'Сердце': {price: 15, img: "https://i.ibb.co.com/600jKJBY/Screenshot-20260713-032932-removebg-preview.png"}, 
-        'Роза': {price: 25, img: "https://i.ibb.co.com/5gXCWBG8/Screenshot-20260713-032917-removebg-preview.png"}, 
-        'Ракета': {price: 50, img: "https://i.ibb.co.com/9mPShrRS/Screenshot-20260713-033022-removebg-preview.png"}, 
-        'Цветы': {price: 50, img: "https://i.ibb.co.com/JFBTVyqY/Screenshot-20260713-033633-removebg-preview.png"}, 
-        'Шапка шута': {price: 500, img: "https://i.ibb.co.com/SwtYwtY1/Screenshot-20260713-033035-removebg-preview.png"}, 
-        'Снуп Догг': {price: 425, img: "https://i.ibb.co.com/CKc4fRk0/Screenshot-20260713-033008-removebg-preview.png"}, 
-        'Кольцо': {price: 100, img: "https://i.ibb.co.com/k68VVH9y/Screenshot-20260713-032904-removebg-preview.png"}, 
-        'Алмаз': {price: 100, img: "https://i.ibb.co.com/Q144Gq7/Screenshot-20260713-032946-removebg-preview.png"}, 
-        'Лол-поп': {price: 325, img: "https://i.ibb.co.com/6J0SBxTX/Screenshot-20260713-032848-removebg-preview.png"},
-        'Лунная змея': {price: 350, img: "https://i.ibb.co.com/kVLkTpQK/Screenshot-20260714-003206-removebg-preview.png"}, 
-        'Гаджет Тамы': {price: 450, img: "https://i.ibb.co.com/LzH5SSpf/Screenshot-20260713-224333-removebg-preview.png"}, 
-        'Праздничный напиток': {price: 450, img: "https://i.ibb.co.com/HT0dGRhc/Screenshot-20260714-003220-removebg-preview.png"}, 
-        'Ведьмина шляпа': {price: 725, img: "https://i.ibb.co.com/8p6F8sG/Screenshot-20260713-224306-removebg-preview.png"}, 
-        'Злой глаз': {price: 925, img: "https://i.ibb.co.com/9X7W5nq/Screenshot-20260713-224251-removebg-preview.png"}, 
-        'Зелье любви': {price: 2075, img: "https://i.ibb.co.com/mCRxBxD2/Screenshot-20260713-224319-removebg-preview.png"},
-        'Змейная коробка': {price: 325, img: DEFAULT_IMG}, 
-        'Носок Xmax': {price: 350, img: DEFAULT_IMG}, 
-        'Печенье Гигнера': {price: 450, img: DEFAULT_IMG}, 
-        'Змейка для питомцев': {price: 450, img: DEFAULT_IMG}, 
-        'Зловечный яд': {price: 700, img: DEFAULT_IMG}, 
-        'Цветок сакуры': {price: 1075, img: DEFAULT_IMG}, 
-        'Висящая звезда': {price: 1225, img: DEFAULT_IMG}, 
-        'Вечная роза': {price: 3325, img: DEFAULT_IMG}, 
-        'Поцелованная Лягушка': {price: 8625, img: DEFAULT_IMG}, 
-        'Бутылка духов': {price: 17350, img: DEFAULT_IMG},
-        'Мороженое Вайс': {price: 325, img: DEFAULT_IMG}, 
-        'Летнее мороженое': {price: 475, img: DEFAULT_IMG}, 
-        'Надувной круг Утка': {price: 600, img: DEFAULT_IMG}, 
-        'Доска для серфинга': {price: 725, img: DEFAULT_IMG}, 
-        'Гипно-леденец': {price: 900, img: DEFAULT_IMG}, 
-        'Винтажная сигара': {price: 1175, img: DEFAULT_IMG}, 
-        'Мухомор-шпион': {price: 2075, img: DEFAULT_IMG}, 
-        'Ионный фен': {price: 3725, img: DEFAULT_IMG}, 
-        'Тропическая змея': {price: 10500, img: DEFAULT_IMG}, 
-        'Веселая шимпанзе': {price: 19375, img: DEFAULT_IMG}, 
-        'Набор Аквариум': {price: 30250, img: DEFAULT_IMG},
-        'Снуп Догг (Дабл Джи)': {price: 480, img: DEFAULT_IMG}, 
-        'Цилиндр (Клокверк)': {price: 680, img: DEFAULT_IMG}, 
-        'Галстук-бабочка (Классический)': {price: 1150, img: DEFAULT_IMG}, 
-        'Папаха (К)': {price: 1430, img: DEFAULT_IMG}, 
-        'Свеча (Чёрная)': {price: 2350, img: DEFAULT_IMG}, 
-        'Лоурайдер (Л.А. Нуар)': {price: 14800, img: DEFAULT_IMG}, 
-        'Духи (Алый Поцелуй)': {price: 19500, img: DEFAULT_IMG},
-        'Роскошный букет': {price: 650, img: DEFAULT_IMG}, 
-        'Мармеладный зайчик': {price: 800, img: DEFAULT_IMG}, 
-        'Безумная тыква': {price: 3500, img: DEFAULT_IMG}, 
-        'Ионный сушильник': {price: 3850, img: DEFAULT_IMG}, 
-        'Шлем неко': {price: 5750, img: DEFAULT_IMG}, 
-        'Драгоценный значок': {price: 14775, img: DEFAULT_IMG}, 
-        'Героический шлем': {price: 48625, img: DEFAULT_IMG},
-        'Вечная свеча (пузырьковая ванна)': {price: 1775, img: DEFAULT_IMG}, 
-        'Купидонский амулет (кристально чистый)': {price: 3375, img: DEFAULT_IMG}, 
-        'Зелье любви (Ледяная королева)': {price: 2550, img: DEFAULT_IMG}, 
-        'Безумная тыква (Обморожение)': {price: 6025, img: DEFAULT_IMG}, 
-        'Поцелованная Лягушка (Эктолягушка)': {price: 10500, img: DEFAULT_IMG}, 
-        'Астральный осколок (Аквариум)': {price: 28950, img: DEFAULT_IMG}, 
-        'Драгоценная персика (пузырьчато-синий)': {price: 202750, img: DEFAULT_IMG},
-        'Испуганный кот (Ментос)': {price: 374025, img: DEFAULT_IMG}, 
-        'Героический шлем (Робенгуда)': {price: 261750, img: DEFAULT_IMG}, 
-        'Знак Вестсайда (Сапфир)': {price: 105275, img: DEFAULT_IMG}, 
-        'Сумка с добычей (Синий Версо)': {price: 74750, img: DEFAULT_IMG}, 
-        'Весёлный шимпанзе (Кристалл)': {price: 37050, img: DEFAULT_IMG}, 
-        'Прохладное пламя (Космический корабль)': {price: 21075, img: DEFAULT_IMG}, 
-        'Свежие носки (Основание)': {price: 13750, img: DEFAULT_IMG}, 
-        'Счастливое brownie (Печеньковый монстр)': {price: 8350, img: DEFAULT_IMG}, 
-        'Клавиша ввода (Телеграм)': {price: 6025, img: DEFAULT_IMG}, 
-        'Снежные рукавицы (Розовые манжеты)': {price: 4465, img: DEFAULT_IMG},
-        'Плюшевый Пеп (ядовитый дротик)': {price: 1205075, img: DEFAULT_IMG}, 
-        'Астральный Кристал(Розовый)': {price: 637025, img: DEFAULT_IMG}, 
-        'Шапка Дурова (Веселое время)': {price: 232775, img: DEFAULT_IMG}, 
-        'Ручной кирпич (денежный ролл)': {price: 102050, img: DEFAULT_IMG}, 
-        'Lampa джинния (дух кошки)': {price: 82050, img: DEFAULT_IMG}, 
-        'Нежный браслет (Лунный кот)': {price: 74725, img: DEFAULT_IMG}, 
-        '🐈‍⬛Напуганный кот (Обелиск)': {price: 61125, img: DEFAULT_IMG}, 
-        '🔮Нежный браслет (для кошек)': {price: 52500, img: DEFAULT_IMG}, 
-        'Собака сопротивления': {price: 36250, img: DEFAULT_IMG}, 
-        '🐱Прикованное кольцо (кошачья кровать)': {price: 22725, img: DEFAULT_IMG}, 
-        'Драгоценный значок (старая бронза)': {price: 18250, img: DEFAULT_IMG},
-        'Значок сердца (черепашки)': {price: 12330325, img: DEFAULT_IMG}, 
-        'Плюшевый Пеп (Эмо-мальчик)': {price: 5036225, img: DEFAULT_IMG}, 
-        'Значок сердца (ночной клуб)': {price: 607050, img: DEFAULT_IMG}, 
-        'Шапка Дурова (Тень)': {price: 225000, img: DEFAULT_IMG}, 
-        'Драгоценная персика (персик черный)': {price: 110725, img: DEFAULT_IMG}, 
-        'Мешок для добычи (черный кошелек)': {price: 112050, img: DEFAULT_IMG}, 
-        'Героический шлем (Преторианский)': {price: 74025, img: DEFAULT_IMG}, 
-        'Ручной кирпич (бетон)': {price: 41250, img: DEFAULT_IMG},
-        'Bonded Ring (Leopard)': {price: 30325, img: DEFAULT_IMG}, 
-        'Kissed Frog (Sarutoad)': {price: 133200, img: DEFAULT_IMG}, 
-        'UFC Strike (Keychain Red)': {price: 237050, img: DEFAULT_IMG}, 
-        'Mad Pumpkin (Cucurbita)': {price: 360500, img: DEFAULT_IMG}, 
-        'Eternal Rose (Paper Bloom)': {price: 1075025, img: DEFAULT_IMG}, 
-        'Rare Bird (Amber Toucan)': {price: 3625000, img: DEFAULT_IMG}
+        "M4A4 | Howl": { price: 1500 },
+        "AWP | Dragon Lore": { price: 3500 },
+        "AK-47 | Case Hardened": { price: 450 },
+        "Glock-18 | Fade": { price: 600 },
+        "USP-S | Kill Confirmed": { price: 120 },
+        "Desert Eagle | Printstream": { price: 180 },
+        "P250 | Sand Dune": { price: 1 },
+        "Auga | Contractor": { price: 2 },
+        "Nova | Predator": { price: 1.5 }
     };
 
     const CASE_CONFIG = {
-        'free': { 
-            name: "📦 Бесплатный кейс", 
-            cost: 0, 
-            image: "https://i.ibb.co.com/605Hp9zw/1783961199947-clean-removebg-preview.png",
-            items: [['Сердце', 60], ['Роза', 17], ['Ракета', 7], ['Цветы', 7], ['Кольцо', 3], ['Алмаз', 3], ['Лол-поп', 1.5], ['Снуп Догг', 1], ['Шапка шута', 0.5]] 
+        "legendary_case": {
+            name: "Легендарный кейс",
+            cost: 250,
+            image: "https://cdn-icons-png.flaticon.com/512/2854/2854586.png",
+            items: [
+                ["M4A4 | Howl", 5],
+                ["AWP | Dragon Lore", 2],
+                ["AK-47 | Case Hardened", 13],
+                ["Glock-18 | Fade", 10],
+                ["USP-S | Kill Confirmed", 30],
+                ["Desert Eagle | Printstream", 40]
+            ]
         },
-        'poor': { 
-            name: "💼 Кейс \"Бедный\"", 
-            cost: 220, 
-            image: "https://i.ibb.co.com/8nj801bk/1783966716675-clean-removebg-preview.png",
-            items: [['Алмаз', 21], ['Кольцо', 18.5], ['Лол-поп', 16], ['Лунная змея', 15], ['Гаджет Тамы', 12], ['Праздничный напиток', 10], ['Ведьмина шляпа', 5], ['Злой глаз', 2], ['Зелье любви', 0.5]] 
-        },
-        'winter': { 
-            name: "❄️ Зимний кейс", 
-            cost: 444, 
-            image: "https://via.placeholder.com/150/121216/38bdf8?text=Winter",
-            items: [['Кольцо', 36.3], ['Змейная коробка', 15], ['Носок Xmax', 12], ['Печенье Гигнера', 8], ['Змейка для питомцев', 8], ['Зловечный яд', 7], ['Цветок сакуры', 6], ['Висящая звезда', 4], ['Вечная роза', 3], ['Поцелованная Лягушка', 0.6], ['Бутылка духов', 0.1]] 
-        },
-        'summer': { 
-            name: "☀️ Летний кейс", 
-            cost: 689, 
-            image: "https://via.placeholder.com/150/121216/38bdf8?text=Summer",
-            items: [['Мороженое Вайс', 43.4], ['Летнее мороженое', 12], ['Надувной круг Утка', 12], ['Доска для серфинга', 10], ['Гипно-леденец', 8], ['Винтажная сигара', 5], ['Мухомор-шпион', 5], ['Ионный фен', 4], ['Тропическая змея', 0.5], ['Веселая шимпанзе', 0.09], ['Набор Аквариум', 0.01]] 
-        },
-        'prokuror': { 
-            name: "⚖️ Кейс \"Прокурор\"", 
-            cost: 840, 
-            image: "https://via.placeholder.com/150/121216/38bdf8?text=Lawyer",
-            items: [['Снуп Догг (Дабл Джи)', 39], ['Цилиндр (Клокверк)', 20], ['Галстук-бабочка (Классический)', 9], ['Папаха (К)', 7], ['Свеча (Чёрная)', 4], ['Лоурайдер (Л.А. Нуар)', 0.7], ['Духи (Алый Поцелуй)', 0.3]] 
-        },
-        'rich': { 
-            name: "💰 Кейс \"Богач\"", 
-            cost: 1364, 
-            image: "https://via.placeholder.com/150/121216/38bdf8?text=Rich",
-            items: [['Роскошный букет', 35], ['Мармеладный зайчик', 25], ['Злой глаз', 21], ['Безумная тыква', 9], ['Ионный сушильник', 5], ['Шлем неко', 4], ['Драгоценный значок', 0.85], ['Героический шлем', 0.15]] 
-        },
-        'fr_ht': { 
-            name: "💙 Замороженное Сердце", 
-            cost: 4500, 
-            image: "https://via.placeholder.com/150/121216/38bdf8?text=Frozen",
-            items: [['Вечная свеча (пузырьковая ванна)', 45.8], ['Купидонский амулет (кристально чистый)', 23], ['Зелье любви (Ледяная королева)', 15], ['Безумная тыква (Обморожение)', 10], ['Поцелованная Лягушка (Эктолягушка)', 4], ['Астральный осколок (Аквариум)', 1.6], ['Драгоценная персика (пузырьчато-синий)', 0.6]] 
-        },
-        'mouth': { 
-            name: "🧼 Полость для пености рта", 
-            cost: 12000, 
-            image: "https://via.placeholder.com/150/121216/38bdf8?text=Mouth",
-            items: [['Испуганный кот (Ментос)', 0.25], ['Героический шлем (Робенгуда)', 0.35], ['Знак Вестсайда (Сапфир)', 1.0], ['Сумка с добычей (Синий Версо)', 1.5], ['Весёлный шимпанзе (Кристалл)', 3.0], ['Прохладное пламя (Космический корабль)', 5.0], ['Свежие носки (Основание)', 8.0], ['Счастливое brownie (Печеньковый монстр)', 17.0], ['Клавиша ввода (Телеграм)', 25.9], ['Снежные рукавицы (Розовые манжеты)', 38.0]] 
-        },
-        'cats': { 
-            name: "🐱 Кейс \"Кошки\"", 
-            cost: 40000, 
-            image: "https://via.placeholder.com/150/121216/38bdf8?text=Cats",
-            items: [['Плюшевый Пеп (ядовитый дротик)', 0.1], ['Астральный Кристал(Розовый)', 0.3], ['Шапка Дурова (Веселое время)', 0.7], ['Ручной кирпич (денежный ролл)', 1.5], ['Lampa джинния (дух кошки)', 2.2], ['Нежный браслет (Лунный кот)', 4.0], ['🐈‍⬛Напуганный кот (Обелиск)', 6.0], ['🔮Нежный браслет (для кошек)', 9.5], ['Собака сопротивления', 13.0], ['🐱Прикованное кольцо (кошачья кровать)', 24.7], ['Драгоценный значок (старая бронза)', 38.0]] 
-        },
-        'nft_battle': { 
-            name: "✔️ Кейс \"Подтверждение\"", 
-            cost: 135000, 
-            image: "https://via.placeholder.com/150/121216/38bdf8?text=NFT",
-            items: [['Значок сердца (черепашки)', 0.1], ['Плюшевый Пеп (Эмо-мальчик)', 0.3], ['Значок сердца (ночной клуб)', 2.0], ['Шапка Дурова (Тень)', 5.0], ['Драгоценная персика (персик черный)', 20.0], ['Мешок для добычи (черный кошелек)', 20.0], ['Героический шлем (Преторианский)', 22.6], ['Ручной кирпич (бетон)', 30.0]] 
-        },
-        'wish_case': { 
-            name: "✨ Кейс \"Желание\"", 
-            cost: 250000, 
-            image: "https://via.placeholder.com/150/121216/38bdf8?text=Wish",
-            items: [['Bonded Ring (Leopard)', 43.0], ['Kissed Frog (Sarutoad)', 35.0], ['UFC Strike (Keychain Red)', 10.5], ['Mad Pumpkin (Cucurbita)', 7.0], ['Eternal Rose (Paper Bloom)', 3.0], ['Rare Bird (Amber Toucan)', 1.5]] 
+        "cheap_case": {
+            name: "Бюджетный кейс",
+            cost: 10,
+            image: "https://cdn-icons-png.flaticon.com/512/679/679720.png",
+            items: [
+                ["USP-S | Kill Confirmed", 2],
+                ["Desert Eagle | Printstream", 3],
+                ["P250 | Sand Dune", 45],
+                ["Auga | Contractor", 30],
+                ["Nova | Predator", 20]
+            ]
         }
     };
 
-    function formatStars(num) {
-        if (!num) return "0";
-        let absNum = Math.abs(num);
-        if (absNum >= 1e12) return (num / 1e12).toFixed(1) + "Т";
-        if (absNum >= 1e9) return (num / 1e9).toFixed(1) + "Б";
-        if (absNum >= 1e6) return (num / 1e6).toFixed(1) + "М";
-        if (absNum >= 1e3) return (num / 1e3).toFixed(1) + "к";
-        return num.toString();
-    }
+    // --- СОСТОЯНИЕ ИГРОКА (ДАННЫЕ ПО УМОЛЧАНИЮ) ---
+    let userId = "local_user";
+    let userBalance = 1000;
+    let userInventory = {};
+    let selectedCaseKey = "";
+    let isRolling = false;
+    let dbClient = null;
 
-    function getItemImage(itemName) {
-        return ITEMS[itemName] && ITEMS[itemName].img ? ITEMS[itemName].img : DEFAULT_IMG;
-    }
+    // Инициализация Supabase (если данные прописаны)
+    const SUPABASE_URL = ""; 
+    const SUPABASE_KEY = ""; 
 
-    function switchTab(tabId) {
-        if (isRolling) return;
-
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.remove('active');
-        });
-        document.querySelectorAll('.tab-button').forEach(btn => {
-            btn.classList.remove('active');
-        });
-
-        document.getElementById(tabId).classList.add('active');
-        
-        const btnIndex = tabId === 'cases-tab' ? 0 : tabId === 'inventory-tab' ? 1 : 2;
-        document.getElementById('bottom-tab-bar').children[btnIndex].classList.add('active');
-
-        if(tabId === 'inventory-tab') {
-            renderInventory();
+    if (SUPABASE_URL && SUPABASE_KEY) {
+        try {
+            dbClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        } catch(e) {
+            console.error("Ошибка инициализации базы данных:", e);
         }
     }
 
-    function initApp() {
-        // Пробуем взять данные из Telegram WebApp
+    // --- ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ ---
+    async function initApp() {
+        // Попытка получить Telegram ID игрока, если скрипт в WebApp
         if (window.Telegram && window.Telegram.WebApp) {
             const tg = window.Telegram.WebApp;
             tg.ready();
             tg.expand();
             if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                userId = tg.initDataUnsafe.user.id.toString();
-                username = tg.initDataUnsafe.user.first_name || "Gamer";
+                userId = String(tg.initDataUnsafe.user.id);
+                document.getElementById("user-name").textContent = tg.initDataUnsafe.user.first_name;
+                if (tg.initDataUnsafe.user.photo_url) {
+                    document.getElementById("user-avatar").src = tg.initDataUnsafe.user.photo_url;
+                }
+            } else {
+                document.getElementById("user-name").textContent = "Игрок (Браузер)";
             }
+        } else {
+            document.getElementById("user-name").textContent = "Игрок (Локально)";
         }
-        document.getElementById("username-display").textContent = username;
-        
-        renderCaseGrid();
-        loadUserData();
+
+        // Загрузка сейвов
+        await loadUserData();
+        renderCasesMenu();
+        renderInventory();
+        updateUI();
     }
 
     async function loadUserData() {
@@ -668,41 +519,64 @@ try {
             try {
                 let { data, error } = await dbClient.from('users').select('*').eq('id', userId).single();
                 if (error && error.code === 'PGRST116') {
-                    // Создаем юзера, если его нет
-                    const { data: newUser, error: createError } = await dbClient
-                        .from('users')
-                        .insert([{ id: userId, username: username, balance: 5000, inventory: {} }])
-                        .select().single();
-                    if (!createError && newUser) data = newUser;
-                }
-                if (data) {
-                    userBalance = data.balance;
-                    userInventory = data.inventory || {};
+                    // Создаем профиль в БД, если его нет
+                    const newUser = { id: userId, balance: 1000, inventory: {} };
+                    await dbClient.from('users').insert([newUser]);
+                    userBalance = newUser.balance;
+                    userInventory = newUser.inventory;
+                } else if (data) {
+                    userBalance = data.balance ?? 1000;
+                    userInventory = data.inventory ?? {};
                 }
             } catch(e) {
-                console.error("Ошибка синхронизации с Supabase:", e);
+                console.error("Не удалось прочитать данные с БД. Режим локального хранилища.", e);
+                loadLocalBackup();
             }
+        } else {
+            loadLocalBackup();
         }
-        updateUI();
+    }
+
+    function loadLocalBackup() {
+        const savedBalance = localStorage.getItem(`bal_${userId}`);
+        const savedInv = localStorage.getItem(`inv_${userId}`);
+        if (savedBalance !== null) userBalance = parseFloat(savedBalance);
+        if (savedInv !== null) userInventory = JSON.parse(savedInv);
     }
 
     async function saveUserData() {
+        updateUI();
+        localStorage.setItem(`bal_${userId}`, userBalance);
+        localStorage.setItem(`inv_${userId}`, JSON.stringify(userInventory));
+
         if (dbClient) {
             try {
-                await dbClient.from('users').update({ balance: userBalance, inventory: userInventory }).eq('id', userId);
-            } catch (e) {
-                console.error("Ошибка сохранения в БД:", e);
+                await dbClient.from('users').update({ 
+                    balance: userBalance, 
+                    inventory: userInventory 
+                }).eq('id', userId);
+            } catch(e) {
+                console.error("Ошибка бэкапа в Supabase:", e);
             }
         }
-        updateUI();
     }
 
     function updateUI() {
-        document.getElementById("balance-value").textContent = formatStars(userBalance);
+        document.getElementById("balance-display").textContent = formatStars(userBalance) + " ★";
     }
 
-    function renderCaseGrid() {
-        const container = document.getElementById("case-grid-container");
+    function formatStars(num) {
+        return Number(num).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    }
+
+    function getItemImage(itemName) {
+        // Заглушка картинок для предметов (можно заменить реальными ссылками)
+        return "https://cdn-icons-png.flaticon.com/512/8113/8113110.png";
+    }
+
+    // --- СБОРКА ИНТЕРФЕЙСА МЕНЮ ---
+    function renderCasesMenu() {
+        const container = document.getElementById("cases-container");
         container.innerHTML = "";
         for (const key in CASE_CONFIG) {
             const c = CASE_CONFIG[key];
@@ -710,9 +584,9 @@ try {
             card.className = "case-card";
             card.onclick = () => selectCase(key);
             card.innerHTML = `
-                <img class="case-card-img" src="${c.image}" alt="${c.name}">
-                <h3>${c.name}</h3>
-                <div class="case-cost">${c.cost === 0 ? "БЕСПЛАТНО" : formatStars(c.cost) + " ★"}</div>
+                <img src="${c.image}" alt="">
+                <div class="case-name">${c.name}</div>
+                <div class="case-price">${formatStars(c.cost)} ★</div>
             `;
             container.appendChild(card);
         }
@@ -722,11 +596,8 @@ try {
         if (isRolling) return;
         selectedCaseKey = key;
         const c = CASE_CONFIG[key];
-        document.getElementById("current-case-name").textContent = c.name;
         
-        // Очищаем старые мульти-рулетки
-        const oldMulti = document.querySelector(".roulettes-container");
-        if (oldMulti) oldMulti.remove();
+        document.getElementById("case-title").textContent = c.name;
         
         const track = document.getElementById("roulette-track");
         track.style.opacity = "1";
@@ -779,7 +650,6 @@ try {
     function backToMenu() {
         if (isRolling) return;
         document.getElementById("opening-screen").style.display = "none";
-        document.getElementById("menu-screen").style.display = "map";
         document.getElementById("menu-screen").style.display = "block";
     }
 
@@ -793,6 +663,7 @@ try {
         return itemsConfig[0][0];
     }
 
+    // --- ЛОГИКА ТЕХНИЧЕСКОГО ОТКРЫТИЯ И КРУТИЛОК ---
     async function startOpening(count = 1) {
         if (isRolling) return; 
         
@@ -860,6 +731,7 @@ try {
             // Добавляем в инвентарь
             userInventory[winItem] = (userInventory[winItem] || 0) + 1;
             saveUserData();
+            renderInventory();
             
             alert(`🎉 Вы выбили: ${winItem}!`);
         }, 4100);
@@ -879,7 +751,7 @@ try {
 
         const roulettesWrap = document.createElement("div");
         roulettesWrap.className = "roulettes-container";
-        roulettesContainer.appendChild(roulettesWrap);
+        rouletteContainer.appendChild(roulettesWrap);
 
         const winItems = [];
         const winIndex = 25;
@@ -927,6 +799,7 @@ try {
                 userInventory[item] = (userInventory[item] || 0) + 1;
             });
             saveUserData();
+            renderInventory();
 
             alert(`🎉 Ваши награды:\n${winItems.map(i => "• " + i).join("\n")}`);
             
@@ -936,6 +809,7 @@ try {
         }, 4200);
     }
 
+    // --- РАБОТА С ИНВЕНТАРЕМ И ПРОДАЖАМИ ---
     function renderInventory() {
         const container = document.getElementById("inventory-list-container");
         const totalCountSpan = document.getElementById("inv-total-count");
@@ -984,7 +858,7 @@ try {
         renderInventory();
     }
 
-    // Запуск приложения
+    // Запуск приложения при полной загрузке страницы
     window.onload = initApp;
 </script>
 </body>
