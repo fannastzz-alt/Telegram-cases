@@ -664,6 +664,102 @@
         }
     }
 
+    function startMultiRoulette(count = 5) {
+    isRolling = true;
+    const currentCase = CASE_CONFIG[selectedCaseKey];
+    
+    // Скрываем стандартную одиночную рулетку на время открытия x5
+    const singleRoulette = document.getElementById("roulette-track");
+    if (singleRoulette) singleRoulette.style.opacity = "0";
+
+    // Ищем или создаем контейнер для мульти-рулетки внутри "roulette-container"
+    const rouletteContainer = document.querySelector(".roulette-container");
+    
+    // Удаляем старый мульти-контейнер, если он остался
+    const oldMulti = document.querySelector(".roulettes-container");
+    if (oldMulti) oldMulti.remove();
+
+    const roulettesWrap = document.createElement("div");
+    roulettesWrap.className = "roulettes-container";
+    rouletteContainer.appendChild(roulettesWrap);
+
+    const winItems = [];
+
+    // Генерируем 5 мини-рулеток
+    for (let r = 0; r < count; r++) {
+        // Здесь должна быть твоя функция выбора случайного предмета по шансам
+        // Если у тебя функция выбора предмета называется иначе, замени её здесь:
+        const winItem = getRandomItem(currentCase.items); 
+        winItems.push(winItem);
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "roulette-wrapper-mini";
+
+        const tape = document.createElement("div");
+        tape.className = "roulette-tape-mini";
+        tape.id = `tape-${r}`;
+
+        // Наполняем ленту (35 предметов для красивой прокрутки)
+        let tapeHTML = "";
+        for (let i = 0; i < 35; i++) {
+            const item = (i === 30) ? winItem : getRandomItem(currentCase.items);
+            // Получаем картинку предмета (или ставим заглушку)
+            const itemImg = typeof getItemImage === 'function' ? getItemImage(item[0]) : "https://i.ibb.co/365879/image.jpg";
+
+            tapeHTML += `
+                <div class="roulette-item-mini">
+                    <img src="${itemImg}" alt="${item[0]}">
+                </div>
+            `;
+        }
+
+        tape.innerHTML = tapeHTML;
+        wrapper.appendChild(tape);
+        roulettesWrap.appendChild(wrapper);
+
+        // Запускаем анимацию прокрутки с легким каскадным сдвигом
+        setTimeout(() => {
+            const itemWidth = 80; // Ширина элемента в CSS
+            const stopPosition = (30 * itemWidth) - (wrapper.offsetWidth / 2) + (itemWidth / 2);
+            const randomShift = Math.floor(Math.random() * 30) - 15; // Для естественности остановки
+            
+            tape.style.transform = `translateX(-${stopPosition + randomShift}px)`;
+        }, r * 150);
+    }
+
+    // Ждем окончания анимации (4 секунды + задержки)
+    setTimeout(() => {
+        isRolling = false;
+        
+        // Показываем выигрыш (замени на свою функцию отображения, например, модальное окно)
+        alert(`Вы выбили:\n${winItems.map(item => `• ${item[0]}`).join('\n')}`);
+        
+        // Твоя функция сохранения выигранных предметов в базу данных
+        if (typeof saveWinItemsToDatabase === 'function') {
+            saveWinItemsToDatabase(winItems);
+        }
+
+        // Возвращаем видимость обычной рулетке
+        if (singleRoulette) singleRoulette.style.opacity = "1";
+        roulettesWrap.remove(); // Удаляем временные 5 рулеток
+
+        // Разблокируем кнопки
+        document.getElementById("open-btn").disabled = false;
+        document.getElementById("open-btn-x5").disabled = false;
+    }, 4500 + (count * 150));
+}
+
+// Вспомогательная функция выбора случайного предмета (если у тебя её нет)
+function getRandomItem(items) {
+    const totalChance = items.reduce((sum, item) => sum + item[1], 0);
+    let random = Math.random() * totalChance;
+    for (const item of items) {
+        if (random < item[1]) return item;
+        random -= item[1];
+    }
+    return items[0];
+}
+
     async function loadUserData() {
         if (window.Telegram && window.Telegram.WebApp) {
             window.Telegram.WebApp.ready();
