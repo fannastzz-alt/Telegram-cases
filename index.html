@@ -8,89 +8,96 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* Контейнер, чтобы кнопки встали красиво в ряд */
-.open-buttons-container {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    width: 100%;
-    max-width: 450px;
-    margin: 15px auto;
-}
+        .open-buttons-container {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            width: 100%;
+            max-width: 450px;
+            margin: 15px auto;
+        }
 
-/* Стили для кнопки x5 */
-.btn-x5 {
-    background: #f59e0b !important; /* Оранжевый/золотой цвет */
-    color: #ffffff !important;
-}
-.btn-x5:hover {
-    background: #d97706 !important;
-}
+        /* Стили для кнопки x5 */
+        .btn-x5 {
+            background: #f59e0b !important; /* Оранжевый/золотой цвет */
+            color: #ffffff !important;
+        }
+        .btn-x5:hover {
+            background: #d97706 !important;
+        }
 
-/* Отключение кнопок при кручении */
-.btn:disabled, .btn-x5:disabled {
-    background: #4b5563 !important;
-    cursor: not-allowed;
-    opacity: 0.6;
-}
+        /* Отключение кнопок при кручении */
+        .btn:disabled, .btn-x5:disabled {
+            background: #4b5563 !important;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
 
-/* Стили для режима мульти-рулетки (x5) */
-.roulettes-container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    width: 100%;
-    max-width: 600px;
-    margin: 20px auto;
-}
+        /* Стили для режима мульти-рулетки (x5) */
+        .roulettes-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 20;
+            background: #0a0a0c;
+            padding: 10px;
+            box-sizing: border-box;
+        }
 
-.roulette-wrapper-mini {
-    position: relative;
-    width: 100%;
-    height: 80px;
-    overflow: hidden;
-    border: 2px solid #38bdf8;
-    background: #121216;
-    border-radius: 12px;
-}
+        .roulette-wrapper-mini {
+            position: relative;
+            width: 100%;
+            height: 80px;
+            overflow: hidden;
+            border: 2px solid #38bdf8;
+            background: #121216;
+            border-radius: 12px;
+        }
 
-.roulette-wrapper-mini::before {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: #ff4a4a;
-    z-index: 10;
-    box-shadow: 0 0 10px #ff4a4a;
-    transform: translateX(-50%);
-}
+        .roulette-wrapper-mini::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #ff4a4a;
+            z-index: 10;
+            box-shadow: 0 0 10px #ff4a4a;
+            transform: translateX(-50%);
+        }
 
-.roulette-tape-mini {
-    display: flex;
-    transition: transform 4s cubic-bezier(0.15, 0.85, 0.35, 1);
-    will-change: transform;
-}
+        .roulette-tape-mini {
+            display: flex;
+            transition: transform 4s cubic-bezier(0.15, 0.85, 0.35, 1);
+            will-change: transform;
+        }
 
-.roulette-item-mini {
-    min-width: 80px;
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #1e1e24;
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
-}
+        .roulette-item-mini {
+            min-width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1e1e24;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
 
-.roulette-item-mini img {
-    width: 50px;
-    height: 50px;
-    object-fit: contain;
-}
+        .roulette-item-mini img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+        }
         
         * { box-sizing: border-box; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
         body {
-            background-color: #0a0a0c; /* Угольно-черный фон как на референсах */
+            background-color: #0a0a0c; /* Угольно-черный фон */
             color: #ffffff;
             margin: 0;
             padding: 16px 16px 95px 16px;
@@ -139,15 +146,15 @@
         /* Стили для увеличенных картинок кейсов в главном меню */
         .case-card-img {
             width: 100%;
-            max-width: 140px; /* Увеличили ширину, чтобы кейс стал больше */
-            height: 120px;    /* Увеличили высоту для сочности */
+            max-width: 140px; 
+            height: 120px;    
             object-fit: contain;
             margin: 5px auto 12px auto;
-            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5)); /* Чуть углубили тень для объема */
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5)); 
             transition: transform 0.2s ease;
         }
         .case-card:active .case-card-img {
-            transform: scale(1.05); /* Легкий интерактивный зум при тапе */
+            transform: scale(1.05); 
         }
         
         .case-card {
@@ -244,15 +251,13 @@
             background: #121216;
             border: 1px solid #1f1f24;
             border-radius: 20px;
-            margin: 25px 0; /* Немного увеличили отступы вокруг рулетки */
+            margin: 25px 0; 
             position: relative;
             overflow: hidden;
             height: 95px; 
             display: flex;
             align-items: center;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
-            
-            /* Вот этот трюк: увеличиваем рулетку визуально в 1.15 раз */
             transform: scale(1.15);
             transform-origin: center;
         }
@@ -271,7 +276,7 @@
         }
         .roulette-track { display: flex; position: absolute; left: 0; transform: translate3d(0px, 0px, 0px); will-change: transform; }
         .roulette-item {
-            width: 80px; /* Физический размер для JS остается старым */
+            width: 80px; 
             height: 75px; 
             background: #1c1c24;
             border: 1px solid #2d2d38;
@@ -281,7 +286,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 0.72rem; /* Слегка уменьшил шрифт, чтобы текст не вылезал при увеличении */
+            font-size: 0.72rem; 
             padding: 4px;
             text-align: center;
             flex-shrink: 0;
@@ -306,7 +311,7 @@
         .loot-chance { color: #34c759; font-weight: 700; font-size: 0.85rem; }
         .loot-price { color: #8e8e93; font-size: 0.8rem; margin-top: 2px; }
 
-        /* Стильное матовое нижнее меню */
+        /* Нижнее меню */
         .tab-bar {
             position: fixed;
             bottom: 0;
@@ -368,9 +373,9 @@
             </div>
             
             <div class="open-buttons-container">
-    <button class="btn" id="open-btn" onclick="startOpening(1)">Открыть кейс</button>
-    <button class="btn btn-x5" id="open-btn-x5" onclick="startOpening(5)">Открыть x5</button>
-</div>
+                <button class="btn" id="open-btn" onclick="startOpening(1)">Открыть кейс</button>
+                <button class="btn btn-x5" id="open-btn-x5" onclick="startOpening(5)">Открыть x5</button>
+            </div>
             <div class="loot-info-section">
                 <h3 style="font-size: 1rem; color: #94a3b8; padding-left: 4px; margin-bottom: 8px;">Содержимое кейса:</h3>
                 <div class="loot-list" id="loot-list-container"></div>
@@ -416,49 +421,9 @@
     const SUPABASE_URL = "https://nfqishqrigetyvnymzss.supabase.co"; 
     const SUPABASE_KEY = "sb_publishable_9y2KDUKbDFpRnnGKJA-udg_gZvu7fQk"; 
 
-    async function startOpening(count = 1) {
-    if (isRolling) return; 
-    
-    const caseInfo = CASE_CONFIG[selectedCaseKey];
-    const totalCost = caseInfo.cost * count;
-
-    // 1. Проверяем баланс
-    if (userBalance < totalCost) {
-        alert(`Недостаточно ⭐! Требуется ${formatStars(totalCost)} ★`);
-        return;
-    }
-
-    // 2. Списываем баланс локально
-    userBalance -= totalCost;
-    updateUI(); // Твоя родная функция обновления баланса на экране!
-
-    // 3. Сохраняем баланс в Supabase, если БД подключена
-    if (dbClient) {
-        try {
-            await dbClient
-                .from('users')
-                .update({ balance: userBalance })
-                .eq('id', userId);
-        } catch (e) {
-            console.error("Ошибка сохранения баланса:", e);
-        }
-    }
-
-    // 4. Блокируем обе кнопки на время кручения
-    document.getElementById("open-btn").disabled = true;
-    document.getElementById("open-btn-x5").disabled = true;
-
-    // 5. Запускаем анимацию
-    if (count === 1) {
-        triggerOpenCase(); 
-    } else {
-        startMultiRoulette(5); 
-    }
-}
-    
     let dbClient = null;
     try {
-        if (window.supabase && typeof window.supabase.createClient === 'function' && !SUPABASE_KEY.includes("ВСТАВЬ_СВОЙ")) {
+        if (window.supabase && typeof window.supabase.createClient === 'function') {
             dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         }
     } catch(e) {
@@ -467,16 +432,14 @@
 
     let userId = "123456789"; 
     let username = "Gamer";
-    let userBalance = 0;
+    let userBalance = 5000; // Стартовый баланс по умолчанию
     let userInventory = {}; 
     let selectedCaseKey = null;
     let isRolling = false;
 
-    // ЗАГЛУШКА: Ссылка на прозрачную серую картинку, если реальное фото не загрузилось
     const DEFAULT_IMG = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjMzM0MTU1Ii8+PC9zdmc+";
-    // ВАЖНО: Вместо "DEFAULT_IMG" тебе нужно вставить свои ссылки на картинки предметов!
+
     const ITEMS = {
-        
         'Сердце': {price: 15, img: "https://i.ibb.co.com/600jKJBY/Screenshot-20260713-032932-removebg-preview.png"}, 
         'Роза': {price: 25, img: "https://i.ibb.co.com/5gXCWBG8/Screenshot-20260713-032917-removebg-preview.png"}, 
         'Ракета': {price: 50, img: "https://i.ibb.co.com/9mPShrRS/Screenshot-20260713-033022-removebg-preview.png"}, 
@@ -562,7 +525,7 @@
         'Драгоценная персика (персик черный)': {price: 110725, img: DEFAULT_IMG}, 
         'Мешок для добычи (черный кошелек)': {price: 112050, img: DEFAULT_IMG}, 
         'Героический шлем (Преторианский)': {price: 74025, img: DEFAULT_IMG}, 
-        'Ручной кирпич (бетон)': {price: 41250},
+        'Ручной кирпич (бетон)': {price: 41250, img: DEFAULT_IMG},
         'Bonded Ring (Leopard)': {price: 30325, img: DEFAULT_IMG}, 
         'Kissed Frog (Sarutoad)': {price: 133200, img: DEFAULT_IMG}, 
         'UFC Strike (Keychain Red)': {price: 237050, img: DEFAULT_IMG}, 
@@ -571,17 +534,17 @@
         'Rare Bird (Amber Toucan)': {price: 3625000, img: DEFAULT_IMG}
     };
 
-  const CASE_CONFIG = {
+    const CASE_CONFIG = {
         'free': { 
             name: "📦 Бесплатный кейс", 
             cost: 0, 
-            image: "https://i.ibb.co.com/605Hp9zw/1783961199947-clean-removebg-preview.png", // Сюда встал твой первый кейс!
+            image: "https://i.ibb.co.com/605Hp9zw/1783961199947-clean-removebg-preview.png",
             items: [['Сердце', 60], ['Роза', 17], ['Ракета', 7], ['Цветы', 7], ['Кольцо', 3], ['Алмаз', 3], ['Лол-поп', 1.5], ['Снуп Догг', 1], ['Шапка шута', 0.5]] 
         },
         'poor': { 
             name: "💼 Кейс \"Бедный\"", 
             cost: 220, 
-            image: "https://i.ibb.co.com/8nj801bk/1783966716675-clean-removebg-preview.png", // Заглушка (замени на свою ссылку)
+            image: "https://i.ibb.co.com/8nj801bk/1783966716675-clean-removebg-preview.png",
             items: [['Алмаз', 21], ['Кольцо', 18.5], ['Лол-поп', 16], ['Лунная змея', 15], ['Гаджет Тамы', 12], ['Праздничный напиток', 10], ['Ведьмина шляпа', 5], ['Злой глаз', 2], ['Зелье любви', 0.5]] 
         },
         'winter': { 
@@ -650,6 +613,10 @@
         return num.toString();
     }
 
+    function getItemImage(itemName) {
+        return ITEMS[itemName] && ITEMS[itemName].img ? ITEMS[itemName].img : DEFAULT_IMG;
+    }
+
     function switchTab(tabId) {
         if (isRolling) return;
 
@@ -670,434 +637,346 @@
         }
     }
 
-    function startMultiRoulette(count = 5) {
-    isRolling = true;
-    const currentCase = CASE_CONFIG[selectedCaseKey];
-    
-    const singleRoulette = document.getElementById("roulette-track");
-    if (singleRoulette) singleRoulette.style.opacity = "0";
-
-    const rouletteContainer = document.querySelector(".roulette-container");
-    
-    const oldMulti = document.querySelector(".roulettes-container");
-    if (oldMulti) oldMulti.remove();
-
-    const roulettesWrap = document.createElement("div");
-    roulettesWrap.className = "roulettes-container";
-    rouletteContainer.appendChild(roulettesWrap);
-
-    const winItems = [];
-
-    for (let r = 0; r < count; r++) {
-        const rawWinItem = getRandomItem(currentCase.items); 
-        // Если это массив [имя, шанс], берем имя. Если просто строка — берём её.
-        const winItemName = Array.isArray(rawWinItem) ? rawWinItem[0] : rawWinItem;
-        winItems.push(winItemName);
-
-        const wrapper = document.createElement("div");
-        wrapper.className = "roulette-wrapper-mini";
-
-        const tape = document.createElement("div");
-        tape.className = "roulette-tape-mini";
-        tape.id = `tape-${r}`;
-
-        let tapeHTML = "";
-        for (let i = 0; i < 35; i++) {
-            const rawItem = (i === 30) ? rawWinItem : getRandomItem(currentCase.items);
-            const itemName = Array.isArray(rawItem) ? rawItem[0] : rawItem;
-            
-            // Вызываем твою функцию getItemImage, передавая полное имя предмета
-            const itemImg = typeof getItemImage === 'function' ? getItemImage(itemName) : "";
-
-            tapeHTML += `
-                <div class="roulette-item-mini">
-                    <img src="${itemImg}" alt="${itemName}">
-                </div>
-            `;
-        }
-
-        tape.innerHTML = tapeHTML;
-        wrapper.appendChild(tape);
-        roulettesWrap.appendChild(wrapper);
-
-        setTimeout(() => {
-            const itemWidth = 80; 
-            const stopPosition = (30 * itemWidth) - (wrapper.offsetWidth / 2) + (itemWidth / 2);
-            const randomShift = Math.floor(Math.random() * 30) - 15; 
-            
-            tape.style.transform = `translateX(-${stopPosition + randomShift}px)`;
-        }, r * 150);
-    }
-
-    setTimeout(async () => {
-        isRolling = false;
-        
-        // Показываем выигрыш с полными именами
-        alert(`Вы выбили:\n${winItems.map(name => `• ${name}`).join('\n')}`);
-        
-        // Начисляем выпавшие предметы в твой инвентарь (userInventory)
-        winItems.forEach(itemName => {
-            userInventory[itemName] = (userInventory[itemName] || 0) + 1;
-        });
-
-        // Сохраняем новый инвентарь в Supabase
-        if (dbClient) {
-            try {
-                await dbClient
-                    .from('users')
-                    .update({ inventory: userInventory })
-                    .eq('id', userId);
-            } catch (e) {
-                console.error("Ошибка сохранения инвентаря в БД:", e);
+    function initApp() {
+        // Пробуем взять данные из Telegram WebApp
+        if (window.Telegram && window.Telegram.WebApp) {
+            const tg = window.Telegram.WebApp;
+            tg.ready();
+            tg.expand();
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                userId = tg.initDataUnsafe.user.id.toString();
+                username = tg.initDataUnsafe.user.first_name || "Gamer";
             }
         }
-
-        // Обновляем весь интерфейс игры и инвентарь на экране
-        updateUI();
-        if (typeof renderInventory === 'function') renderInventory();
-
-        // Возвращаем видимость обычной рулетке
-        if (singleRoulette) singleRoulette.style.opacity = "1";
-        roulettesWrap.remove(); 
-
-        // Разблокируем кнопки
-        document.getElementById("open-btn").disabled = false;
-        document.getElementById("open-btn-x5").disabled = false;
-    }, 4500 + (count * 150));
-}
-
-        tape.innerHTML = tapeHTML;
-        wrapper.appendChild(tape);
-        roulettesWrap.appendChild(wrapper);
-
-        // Запускаем анимацию прокрутки с легким каскадным сдвигом
-        setTimeout(() => {
-            const itemWidth = 80; // Ширина элемента в CSS
-            const stopPosition = (30 * itemWidth) - (wrapper.offsetWidth / 2) + (itemWidth / 2);
-            const randomShift = Math.floor(Math.random() * 30) - 15; // Для естественности остановки
-            
-            tape.style.transform = `translateX(-${stopPosition + randomShift}px)`;
-        }, r * 150);
-    }
-
-    // Ждем окончания анимации (4 секунды + задержки)
-    setTimeout(() => {
-        isRolling = false;
+        document.getElementById("username-display").textContent = username;
         
-        // Показываем выигрыш (замени на свою функцию отображения, например, модальное окно)
-        alert(`Вы выбили:\n${winItems.map(item => `• ${item[0]}`).join('\n')}`);
-        
-        // Твоя функция сохранения выигранных предметов в базу данных
-        if (typeof saveWinItemsToDatabase === 'function') {
-            saveWinItemsToDatabase(winItems);
-        }
-
-        // Возвращаем видимость обычной рулетке
-        if (singleRoulette) singleRoulette.style.opacity = "1";
-        roulettesWrap.remove(); // Удаляем временные 5 рулеток
-
-        // Разблокируем кнопки
-        document.getElementById("open-btn").disabled = false;
-        document.getElementById("open-btn-x5").disabled = false;
-    }, 4500 + (count * 150));
-}
-
-// Вспомогательная функция выбора случайного предмета (если у тебя её нет)
-function getRandomItem(items) {
-    const totalChance = items.reduce((sum, item) => sum + item[1], 0);
-    let random = Math.random() * totalChance;
-    for (const item of items) {
-        if (random < item[1]) return item;
-        random -= item[1];
+        renderCaseGrid();
+        loadUserData();
     }
-    return items[0];
-}
 
     async function loadUserData() {
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.expand();
-            const tgData = window.Telegram.WebApp.initDataUnsafe;
-            if (tgData && tgData.user) {
-                userId = tgData.user.id.toString();
-                username = tgData.user.username || tgData.user.first_name || "Gamer";
+        if (dbClient) {
+            try {
+                let { data, error } = await dbClient.from('users').select('*').eq('id', userId).single();
+                if (error && error.code === 'PGRST116') {
+                    // Создаем юзера, если его нет
+                    const { data: newUser, error: createError } = await dbClient
+                        .from('users')
+                        .insert([{ id: userId, username: username, balance: 5000, inventory: {} }])
+                        .select().single();
+                    if (!createError && newUser) data = newUser;
+                }
+                if (data) {
+                    userBalance = data.balance;
+                    userInventory = data.inventory || {};
+                }
+            } catch(e) {
+                console.error("Ошибка синхронизации с Supabase:", e);
             }
         }
-        document.getElementById("username-display").innerText = "@" + username;
+        updateUI();
+    }
 
-        if (!dbClient) {
-            document.getElementById("username-display").innerText = "Тестовый режим (Без БД)";
-            userBalance = 500000; 
-            userInventory = {};
-            updateUI();
-            renderMenu();
-            renderInventory();
-            return;
-        }
-
-        try {
-            let { data, error } = await dbClient.from('users').select('*').eq('id', userId).maybeSingle();
-            if (error) throw error;
-
-            if (!data) {
-                const newUser = { id: userId, username: username, balance: 5000, inventory: {} };
-                await dbClient.from('users').insert([newUser]);
-                userBalance = 5000;
-                userInventory = {};
-            } else {
-                userBalance = data.balance || 0;
-                userInventory = data.inventory || {};
+    async function saveUserData() {
+        if (dbClient) {
+            try {
+                await dbClient.from('users').update({ balance: userBalance, inventory: userInventory }).eq('id', userId);
+            } catch (e) {
+                console.error("Ошибка сохранения в БД:", e);
             }
-            updateUI();
-        } catch (e) {
-            console.error(e);
-            document.getElementById("username-display").innerText = "БД недоступна (Автономно)";
-            userBalance = 500000;
-            updateUI();
-        } finally {
-            renderMenu();
-            renderInventory();
         }
+        updateUI();
     }
 
     function updateUI() {
-        document.getElementById("balance-value").innerText = formatStars(userBalance);
+        document.getElementById("balance-value").textContent = formatStars(userBalance);
     }
 
-    function renderMenu() {
+    function renderCaseGrid() {
         const container = document.getElementById("case-grid-container");
         container.innerHTML = "";
-        Object.keys(CASE_CONFIG).forEach(key => {
-            const caseInfo = CASE_CONFIG[key];
+        for (const key in CASE_CONFIG) {
+            const c = CASE_CONFIG[key];
             const card = document.createElement("div");
             card.className = "case-card";
-            
-            // Проверяем: если картинки нет, ставим стандартную иконку коробки
-            const caseImgSrc = caseInfo.image || "https://i.ibb.co/365879/image.jpg"; 
-
+            card.onclick = () => selectCase(key);
             card.innerHTML = `
-                <img src="${caseImgSrc}" alt="${caseInfo.name}" class="case-card-img">
-                <h3>${caseInfo.name}</h3>
-                <div class="case-cost">${caseInfo.cost > 0 ? formatStars(caseInfo.cost) + " ⭐" : "Бесплатно"}</div>
+                <img class="case-card-img" src="${c.image}" alt="${c.name}">
+                <h3>${c.name}</h3>
+                <div class="case-cost">${c.cost === 0 ? "БЕСПЛАТНО" : formatStars(c.cost) + " ★"}</div>
             `;
-            card.onclick = () => openCaseScreen(key);
             container.appendChild(card);
-        });
-    }
-
-    function renderInventory() {
-        const container = document.getElementById("inventory-list-container");
-        const countDisplay = document.getElementById("inv-total-count");
-        container.innerHTML = "";
-
-        const itemKeys = Object.keys(userInventory).filter(k => userInventory[k] > 0);
-        let totalItems = 0;
-
-        if (itemKeys.length === 0) {
-            container.innerHTML = '<div class="inventory-empty">Здесь пока ничего нет. Откройте свой первый кейс!</div>';
-            countDisplay.innerText = "(0 шт.)";
-            return;
-        }
-
-        itemKeys.forEach(name => {
-            const count = userInventory[name];
-            totalItems += count;
-            const price = ITEMS[name] ? ITEMS[name].price : 0;
-            const itemImg = ITEMS[name] ? ITEMS[name].img : DEFAULT_IMG;
-
-            const row = document.createElement("div");
-            row.className = "inventory-item-row";
-            row.innerHTML = `
-                <div class="inv-item-info">
-                    <img src="${itemImg}" class="inv-item-img" alt="">
-                    <span>${name}</span>
-                    <span class="inv-item-count">x${count}</span>
-                </div>
-                <button class="btn-sell" onclick="sellItem('${name}')">Продать за ${formatStars(price)} ⭐</button>
-            `;
-            container.appendChild(row);
-        });
-
-        countDisplay.innerText = `(${totalItems} шт.)`;
-    }
-
-    async function sellItem(name) {
-        if (isRolling || !userInventory[name] || userInventory[name] <= 0) return;
-        
-        const price = ITEMS[name] ? ITEMS[name].price : 0;
-        
-        userInventory[name]--;
-        if (userInventory[name] === 0) {
-            delete userInventory[name];
-        }
-        userBalance += price;
-        
-        updateUI();
-        renderInventory();
-
-        if (dbClient) {
-            await dbClient.from('users').update({ balance: userBalance, inventory: userInventory }).eq('id', userId);
         }
     }
 
-    function openCaseScreen(key) {
-    if (isRolling) return;
-    selectedCaseKey = key;
-    const caseInfo = CASE_CONFIG[key];
-
-    document.getElementById("menu-screen").style.display = "none";
-    document.getElementById("opening-screen").style.display = "block";
-    document.getElementById("current-case-name").innerText = caseInfo.name;
-    
-    // Получаем обе кнопки
-    const btnX1 = document.getElementById("open-btn");
-    const btnX5 = document.getElementById("open-btn-x5");
-    
-    btnX1.disabled = false;
-    btnX5.disabled = false;
-
-    // Подставляем цены (для x1 и умноженную на 5 для x5)
-    btnX1.innerText = `Открыть за ${formatStars(caseInfo.cost)} ★`;
-    btnX5.innerText = `Открыть x5 за ${formatStars(caseInfo.cost * 5)} ★`;
-
-    generateLootList(caseInfo.items);
-    resetRoulette(caseInfo.items);
-
-    document.getElementById("bottom-tab-bar").style.display = "none";
-}
-
-    function backToMenu() {
-        if(isRolling) return;
-        document.getElementById("menu-screen").style.display = "block";
-        document.getElementById("opening-screen").style.display = "none";
-        selectedCaseKey = null;
+    function selectCase(key) {
+        if (isRolling) return;
+        selectedCaseKey = key;
+        const c = CASE_CONFIG[key];
+        document.getElementById("current-case-name").textContent = c.name;
         
-        document.getElementById("bottom-tab-bar").style.display = "flex";
-    }
-
-    function generateLootList(itemsArray) {
-        const container = document.getElementById("loot-list-container");
-        container.innerHTML = "";
+        // Очищаем старые мульти-рулетки
+        const oldMulti = document.querySelector(".roulettes-container");
+        if (oldMulti) oldMulti.remove();
         
-        const sortedItems = [...itemsArray].sort((a,b) => a[1] - b[1]);
+        const track = document.getElementById("roulette-track");
+        track.style.opacity = "1";
+        track.style.transition = "none";
+        track.style.transform = "translate3d(0px, 0px, 0px)";
+        track.innerHTML = "";
 
-        sortedItems.forEach(([name, chance]) => {
-            const price = ITEMS[name] ? ITEMS[name].price : 0;
-            const itemImg = ITEMS[name] ? ITEMS[name].img : DEFAULT_IMG;
+        // Набиваем базовый трек превью-айтемами
+        for(let i=0; i<15; i++) {
+            const randomItemName = c.items[Math.floor(Math.random() * c.items.length)][0];
+            track.appendChild(createRouletteItemNode(randomItemName));
+        }
+
+        // Рендерим лут-лист
+        const lootContainer = document.getElementById("loot-list-container");
+        lootContainer.innerHTML = "";
+        c.items.forEach(itemArr => {
+            const name = itemArr[0];
+            const chance = itemArr[1];
+            const itemInfo = ITEMS[name] || {price: 0};
             const row = document.createElement("div");
             row.className = "loot-item-row";
             row.innerHTML = `
                 <div class="loot-name">
-                    <img src="${itemImg}" alt="">
+                    <img src="${getItemImage(name)}" alt="">
                     <span>${name}</span>
                 </div>
                 <div class="loot-details">
                     <div class="loot-chance">${chance}%</div>
-                    <div class="loot-price">${formatStars(price)} ⭐</div>
+                    <div class="loot-price">${formatStars(itemInfo.price)} ★</div>
                 </div>
             `;
-            container.appendChild(row);
+            lootContainer.appendChild(row);
         });
+
+        document.getElementById("menu-screen").style.display = "none";
+        document.getElementById("opening-screen").style.display = "block";
     }
 
-    function resetRoulette(itemsArray) {
+    function createRouletteItemNode(itemName) {
+        const div = document.createElement("div");
+        div.className = "roulette-item";
+        div.innerHTML = `
+            <img src="${getItemImage(itemName)}" alt="">
+            <div class="name">${itemName}</div>
+        `;
+        return div;
+    }
+
+    function backToMenu() {
+        if (isRolling) return;
+        document.getElementById("opening-screen").style.display = "none";
+        document.getElementById("menu-screen").style.display = "map";
+        document.getElementById("menu-screen").style.display = "block";
+    }
+
+    function getRandomItem(itemsConfig) {
+        let rand = Math.random() * 100;
+        let sum = 0;
+        for (let i = 0; i < itemsConfig.length; i++) {
+            sum += itemsConfig[i][1];
+            if (rand <= sum) return itemsConfig[i][0];
+        }
+        return itemsConfig[0][0];
+    }
+
+    async function startOpening(count = 1) {
+        if (isRolling) return; 
+        
+        const caseInfo = CASE_CONFIG[selectedCaseKey];
+        const totalCost = caseInfo.cost * count;
+
+        if (userBalance < totalCost) {
+            alert(`Недостаточно ⭐! Требуется ${formatStars(totalCost)} ★`);
+            return;
+        }
+
+        userBalance -= totalCost;
+        updateUI();
+
+        if (dbClient) {
+            try {
+                await dbClient.from('users').update({ balance: userBalance }).eq('id', userId);
+            } catch (e) {
+                console.error("Ошибка сохранения баланса:", e);
+            }
+        }
+
+        document.getElementById("open-btn").disabled = true;
+        document.getElementById("open-btn-x5").disabled = true;
+
+        if (count === 1) {
+            triggerOpenCase(); 
+        } else {
+            startMultiRoulette(5); 
+        }
+    }
+
+    function triggerOpenCase() {
+        isRolling = true;
+        const currentCase = CASE_CONFIG[selectedCaseKey];
+        const winItem = getRandomItem(currentCase.items);
+
         const track = document.getElementById("roulette-track");
         track.style.transition = "none";
         track.style.transform = "translate3d(0px, 0px, 0px)";
         track.innerHTML = "";
 
+        const itemWidth = 86; // 80px + 6px маргины
+        const winIndex = 25;  // Индекс победного элемента
+
         for (let i = 0; i < 35; i++) {
-            const randomName = itemsArray[Math.floor(Math.random() * itemsArray.length)][0];
-            track.appendChild(createItemNode(randomName));
-        }
-    }
-
-    function createItemNode(name) {
-        const node = document.createElement("div");
-        node.className = "roulette-item";
-        
-        const itemImg = ITEMS[name] ? ITEMS[name].img : DEFAULT_IMG;
-
-        node.innerHTML = `
-            <img src="${itemImg}" alt="">
-            <div class="name">${name}</div>
-        `;
-        return node;
-    }
-
-    function getRandomItem(itemsArray) {
-        let totalWeight = itemsArray.reduce((sum, item) => sum + item[1], 0);
-        let randomNum = Math.random() * totalWeight;
-        for (let i = 0; i < itemsArray.length; i++) {
-            if (randomNum < itemsArray[i][1]) return itemsArray[i][0];
-            randomNum -= itemsArray[i][1];
-        }
-        return itemsArray[0][0];
-    }
-
-    async function triggerOpenCase() {
-        if (isRolling || !selectedCaseKey) return;
-        const caseInfo = CASE_CONFIG[selectedCaseKey];
-
-        if (userBalance < caseInfo.cost) {
-            alert("Недостаточно звёзд!");
-            return;
+            let name = (i === winIndex) ? winItem : getRandomItem(currentCase.items);
+            track.appendChild(createRouletteItemNode(name));
         }
 
-        isRolling = true;
-        document.getElementById("open-btn").disabled = true;
-
-        const track = document.getElementById("roulette-track");
-        track.style.transition = "none";
-        track.style.transform = "translate3d(0px, 0px, 0px)";
-        track.offsetHeight; 
-
-        const winningItem = getRandomItem(caseInfo.items);
-
-        userBalance -= caseInfo.cost;
-        userInventory[winningItem] = (userInventory[winningItem] || 0) + 1;
-        updateUI();
-
-        if (dbClient) {
-            const { error } = await dbClient.from('users').update({ balance: userBalance, inventory: userInventory }).eq('id', userId);
-            if (error) {
-                alert("Ошибка сохранения данных!");
-                isRolling = false;
-                document.getElementById("open-btn").disabled = false;
-                return;
-            }
-        }
-
-        const itemsNodes = track.children;
-        for(let i=0; i<35; i++) {
-            if(i === 28) {
-                track.replaceChild(createItemNode(winningItem), itemsNodes[i]);
-            } else {
-                const randName = caseInfo.items[Math.floor(Math.random() * caseInfo.items.length)][0];
-                track.replaceChild(createItemNode(randName), itemsNodes[i]);
-            }
-        }
-
-        const itemWidth = 86; 
-        const containerWidth = document.querySelector('.roulette-container').offsetWidth;
-        const centerOffset = (containerWidth / 2) - (itemWidth / 2);
-        const finalX = -(28 * itemWidth) + centerOffset;
-
-        track.style.transition = "transform 4s cubic-bezier(0.1, 0.85, 0.15, 1)";
-        track.style.transform = `translate3d(${finalX}px, 0px, 0px)`;
+        setTimeout(() => {
+            track.style.transition = "transform 4s cubic-bezier(0.15, 0.85, 0.35, 1)";
+            const containerWidth = document.querySelector(".roulette-container").clientWidth;
+            // Смещение к центру победного элемента с легким случайным сдвигом внутри карточки
+            const randShift = Math.floor(Math.random() * 40) - 20;
+            const targetX = -(winIndex * itemWidth - containerWidth / 2 + itemWidth / 2) + randShift;
+            track.style.transform = `translate3d(${targetX}px, 0px, 0px)`;
+        }, 50);
 
         setTimeout(() => {
             isRolling = false;
             document.getElementById("open-btn").disabled = false;
-            if(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
-                window.Telegram.WebApp.showAlert(`Вы выбили: ${winningItem}!`);
-            } else {
-                alert(`Вы выбили: ${winningItem}!`);
+            document.getElementById("open-btn-x5").disabled = false;
+            
+            // Добавляем в инвентарь
+            userInventory[winItem] = (userInventory[winItem] || 0) + 1;
+            saveUserData();
+            
+            alert(`🎉 Вы выбили: ${winItem}!`);
+        }, 4100);
+    }
+
+    function startMultiRoulette(count = 5) {
+        isRolling = true;
+        const currentCase = CASE_CONFIG[selectedCaseKey];
+        
+        const singleRoulette = document.getElementById("roulette-track");
+        if (singleRoulette) singleRoulette.style.opacity = "0";
+
+        const rouletteContainer = document.querySelector(".roulette-container");
+        
+        const oldMulti = document.querySelector(".roulettes-container");
+        if (oldMulti) oldMulti.remove();
+
+        const roulettesWrap = document.createElement("div");
+        roulettesWrap.className = "roulettes-container";
+        roulettesContainer.appendChild(roulettesWrap);
+
+        const winItems = [];
+        const winIndex = 25;
+        const itemWidth = 81; // 80px + 1px border
+
+        for (let r = 0; r < count; r++) {
+            const winItemName = getRandomItem(currentCase.items);
+            winItems.push(winItemName);
+
+            const wrapper = document.createElement("div");
+            wrapper.className = "roulette-wrapper-mini";
+
+            const tape = document.createElement("div");
+            tape.className = "roulette-tape-mini";
+            tape.id = `tape-${r}`;
+
+            for (let i = 0; i < 35; i++) {
+                const itemName = (i === winIndex) ? winItemName : getRandomItem(currentCase.items);
+                const itemImg = getItemImage(itemName);
+
+                const itemDiv = document.createElement("div");
+                itemDiv.className = "roulette-item-mini";
+                itemDiv.innerHTML = `<img src="${itemImg}" alt="${itemName}">`;
+                tape.appendChild(itemDiv);
             }
-        }, 4200);
+            wrapper.appendChild(tape);
+            roulettesWrap.appendChild(wrapper);
+
+            setTimeout(() => {
+                tape.style.transition = "transform 4s cubic-bezier(0.15, 0.85, 0.35, 1)";
+                const containerWidth = wrapper.clientWidth;
+                const randShift = Math.floor(Math.random() * 30) - 15;
+                const targetX = -(winIndex * itemWidth - containerWidth / 2 + itemWidth / 2) + randShift;
+                tape.style.transform = `translate3d(${targetX}px, 0px, 0px)`;
+            }, 50);
         }
 
-    window.addEventListener('DOMContentLoaded', loadUserData);
+        setTimeout(() => {
+            isRolling = false;
+            document.getElementById("open-btn").disabled = false;
+            document.getElementById("open-btn-x5").disabled = false;
+
+            // Начисляем все выпавшие предметы
+            winItems.forEach(item => {
+                userInventory[item] = (userInventory[item] || 0) + 1;
+            });
+            saveUserData();
+
+            alert(`🎉 Ваши награды:\n${winItems.map(i => "• " + i).join("\n")}`);
+            
+            // Возвращаем обычную рулетку
+            roulettesWrap.remove();
+            if (singleRoulette) singleRoulette.style.opacity = "1";
+        }, 4200);
+    }
+
+    function renderInventory() {
+        const container = document.getElementById("inventory-list-container");
+        const totalCountSpan = document.getElementById("inv-total-count");
+        container.innerHTML = "";
+
+        let totalItems = 0;
+        let hasItems = false;
+
+        for (const name in userInventory) {
+            const count = userInventory[name];
+            if (count <= 0) continue;
+            hasItems = true;
+            totalItems += count;
+
+            const itemInfo = ITEMS[name] || {price: 0};
+            const row = document.createElement("div");
+            row.className = "inventory-item-row";
+            row.innerHTML = `
+                <div class="inv-item-info">
+                    <img class="inv-item-img" src="${getItemImage(name)}" alt="">
+                    <span>${name}</span>
+                    <span class="inv-item-count">${count} шт.</span>
+                </div>
+                <button class="btn-sell" onclick="sellItem('${name}')">Продать за ${formatStars(itemInfo.price)} ★</button>
+            `;
+            container.appendChild(row);
+        }
+
+        totalCountSpan.textContent = `(${totalItems} шт.)`;
+
+        if (!hasItems) {
+            container.innerHTML = `<div class="inventory-empty">Здесь пока ничего нет. Откройте свой первый кейс!</div>`;
+        }
+    }
+
+    function sellItem(name) {
+        if (isRolling) return;
+        if (!userInventory[name] || userInventory[name] <= 0) return;
+
+        const itemInfo = ITEMS[name] || {price: 0};
+        
+        userInventory[name] -= 1;
+        userBalance += itemInfo.price;
+
+        saveUserData();
+        renderInventory();
+    }
+
+    // Запуск приложения
+    window.onload = initApp;
 </script>
 </body>
 </html>
