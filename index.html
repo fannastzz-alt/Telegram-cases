@@ -35,59 +35,36 @@
 
         /* Стили для режима мульти-рулетки (x5) */
         .roulettes-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            width: 100%;
-            max-width: 600px;
-            margin: 20px auto;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 20;
-            background: #0a0a0c;
-            padding: 10px;
-            box-sizing: border-box;
-        }
-
-        .roulette-wrapper-mini {
-            position: relative;
-            width: 100%;
-            height: 80px;
-            overflow: hidden;
-            border: 2px solid #38bdf8;
-            background: #121216;
-            border-radius: 12px;
-        }
-
-        .roulette-wrapper-mini::before {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background: #ff4a4a;
-            z-index: 10;
-            box-shadow: 0 0 10px #ff4a4a;
-            transform: translateX(-50%);
-        }
-
-        .roulette-tape-mini {
-            display: flex;
-            transition: transform 4s cubic-bezier(0.15, 0.85, 0.35, 1);
-            will-change: transform;
-        }
-
-        .roulette-item-mini {
-            min-width: 80px;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #1e1e24;
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
-        }
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    margin-top: 20px;
+}
+.roulette-wrapper-mini {
+    width: 280px;
+    height: 80px;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid #38bdf8;
+    background: #121216;
+    border-radius: 12px;
+}
+.roulette-tape-mini {
+    display: flex;
+    position: absolute;
+    left: 0;
+}
+.roulette-item-mini {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1e1e24;
+}
 
         .roulette-item-mini img {
             width: 50px;
