@@ -422,29 +422,36 @@
     const caseInfo = CASE_CONFIG[selectedCaseKey];
     const totalCost = caseInfo.cost * count;
 
-    // 1. Проверяем баланс (используй переменную твоего баланса, например, userBalance)
-    if (typeof userBalance !== 'undefined' && userBalance < totalCost) {
+    // 1. Проверяем баланс
+    if (userBalance < totalCost) {
         alert(`Недостаточно ⭐! Требуется ${formatStars(totalCost)} ★`);
         return;
     }
 
-    // 2. Списываем баланс локально и в базе данных Supabase
-    if (typeof userBalance !== 'undefined') {
-        userBalance -= totalCost;
-        if (typeof updateBalanceOnUI === 'function') updateBalanceOnUI();
-        if (typeof saveBalanceToSupabase === 'function') await saveBalanceToSupabase(userBalance);
+    // 2. Списываем баланс локально
+    userBalance -= totalCost;
+    updateUI(); // Твоя родная функция обновления баланса на экране!
+
+    // 3. Сохраняем баланс в Supabase, если БД подключена
+    if (dbClient) {
+        try {
+            await dbClient
+                .from('users')
+                .update({ balance: userBalance })
+                .eq('id', userId);
+        } catch (e) {
+            console.error("Ошибка сохранения баланса:", e);
+        }
     }
 
-    // 3. Блокируем обе кнопки на время кручения
+    // 4. Блокируем обе кнопки на время кручения
     document.getElementById("open-btn").disabled = true;
     document.getElementById("open-btn-x5").disabled = true;
 
-    // 4. Запускаем анимацию
+    // 5. Запускаем анимацию
     if (count === 1) {
-        // Твоя стандартная функция открытия одного кейса
         triggerOpenCase(); 
     } else {
-        // Логика запуска пяти рулеток
         startMultiRoulette(5); 
     }
 }
@@ -667,14 +674,11 @@
     isRolling = true;
     const currentCase = CASE_CONFIG[selectedCaseKey];
     
-    // Скрываем стандартную одиночную рулетку на время открытия x5
     const singleRoulette = document.getElementById("roulette-track");
     if (singleRoulette) singleRoulette.style.opacity = "0";
 
-    // Ищем или создаем контейнер для мульти-рулетки внутри "roulette-container"
     const rouletteContainer = document.querySelector(".roulette-container");
     
-    // Удаляем старый мульти-контейнер, если он остался
     const oldMulti = document.querySelector(".roulettes-container");
     if (oldMulti) oldMulti.remove();
 
@@ -684,12 +688,11 @@
 
     const winItems = [];
 
-    // Генерируем 5 мини-рулеток
     for (let r = 0; r < count; r++) {
-        // Здесь должна быть твоя функция выбора случайного предмета по шансам
-        // Если у тебя функция выбора предмета называется иначе, замени её здесь:
-        const winItem = getRandomItem(currentCase.items); 
-        winItems.push(winItem);
+        const rawWinItem = getRandomItem(currentCase.items); 
+        // Если это массив [имя, шанс], берем имя. Если просто строка — берём её.
+        const winItemName = Array.isArray(rawWinItem) ? rawWinItem[0] : rawWinItem;
+        winItems.push(winItemName);
 
         const wrapper = document.createElement("div");
         wrapper.className = "roulette-wrapper-mini";
@@ -698,19 +701,70 @@
         tape.className = "roulette-tape-mini";
         tape.id = `tape-${r}`;
 
-        // Наполняем ленту (35 предметов для красивой прокрутки)
         let tapeHTML = "";
         for (let i = 0; i < 35; i++) {
-            const item = (i === 30) ? winItem : getRandomItem(currentCase.items);
-            // Получаем картинку предмета (или ставим заглушку)
-            const itemImg = typeof getItemImage === 'function' ? getItemImage(item[0]) : "https://i.ibb.co/365879/image.jpg";
+            const rawItem = (i === 30) ? rawWinItem : getRandomItem(currentCase.items);
+            const itemName = Array.isArray(rawItem) ? rawItem[0] : rawItem;
+            
+            // Вызываем твою функцию getItemImage, передавая полное имя предмета
+            const itemImg = typeof getItemImage === 'function' ? getItemImage(itemName) : "";
 
             tapeHTML += `
                 <div class="roulette-item-mini">
-                    <img src="${itemImg}" alt="${item[0]}">
+                    <img src="${itemImg}" alt="${itemName}">
                 </div>
             `;
         }
+
+        tape.innerHTML = tapeHTML;
+        wrapper.appendChild(tape);
+        roulettesWrap.appendChild(wrapper);
+
+        setTimeout(() => {
+            const itemWidth = 80; 
+            const stopPosition = (30 * itemWidth) - (wrapper.offsetWidth / 2) + (itemWidth / 2);
+            const randomShift = Math.floor(Math.random() * 30) - 15; 
+            
+            tape.style.transform = `translateX(-${stopPosition + randomShift}px)`;
+        }, r * 150);
+    }
+
+    setTimeout(async () => {
+        isRolling = false;
+        
+        // Показываем выигрыш с полными именами
+        alert(`Вы выбили:\n${winItems.map(name => `• ${name}`).join('\n')}`);
+        
+        // Начисляем выпавшие предметы в твой инвентарь (userInventory)
+        winItems.forEach(itemName => {
+            userInventory[itemName] = (userInventory[itemName] || 0) + 1;
+        });
+
+        // Сохраняем новый инвентарь в Supabase
+        if (dbClient) {
+            try {
+                await dbClient
+                    .from('users')
+                    .update({ inventory: userInventory })
+                    .eq('id', userId);
+            } catch (e) {
+                console.error("Ошибка сохранения инвентаря в БД:", e);
+            }
+        }
+
+        // Обновляем весь интерфейс игры и инвентарь на экране
+        updateUI();
+        if (typeof renderInventory === 'function') renderInventory();
+
+        // Возвращаем видимость обычной рулетке
+        if (singleRoulette) singleRoulette.style.opacity = "1";
+        roulettesWrap.remove(); 
+
+        // Разблокируем кнопки
+        document.getElementById("open-btn").disabled = false;
+        document.getElementById("open-btn-x5").disabled = false;
+    }, 4500 + (count * 150));
+}
 
         tape.innerHTML = tapeHTML;
         wrapper.appendChild(tape);
