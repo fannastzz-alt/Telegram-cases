@@ -32,7 +32,6 @@
             user-select: none;
         }
 
-        /* Основной контейнер приложения под размеры экрана Telegram */
         #app-container {
             display: flex;
             flex-direction: column;
@@ -43,7 +42,6 @@
             background-color: var(--bg-color);
         }
 
-        /* Верхняя панель (Header) */
         header {
             background-color: var(--surface-color);
             padding: 12px 16px;
@@ -94,11 +92,10 @@
             font-size: 16px;
         }
 
-        /* Контентная зона */
         .content-area {
             flex: 1;
             overflow-y: auto;
-            padding-bottom: 80px; /* отступ под нижний таб-бар */
+            padding-bottom: 80px; 
             position: relative;
         }
 
@@ -111,7 +108,6 @@
             display: block;
         }
 
-        /* Сетка кейсов */
         .cases-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -164,7 +160,6 @@
             color: var(--success-color);
         }
 
-        /* Окно открытия кейса (Экран рулетки) */
         #roulette-screen {
             display: none;
             position: absolute;
@@ -174,7 +169,7 @@
             bottom: 0;
             background-color: var(--bg-color);
             z-index: 20;
-            padding: 24px 16px;
+            padding: 16px;
             flex-direction: column;
             align-items: center;
         }
@@ -189,18 +184,17 @@
             display: flex;
             align-items: center;
             gap: 4px;
-            margin-bottom: 24px;
+            margin-bottom: 16px;
             cursor: pointer;
         }
 
         .roulette-case-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
-            margin-bottom: 32px;
+            margin-bottom: 20px;
             text-align: center;
         }
 
-        /* Сама рулетка */
         .roulette-wrapper {
             position: relative;
             width: 100%;
@@ -210,10 +204,9 @@
             border-radius: var(--border-radius);
             overflow: hidden;
             border: 2px solid rgba(255, 255, 255, 0.05);
-            margin-bottom: 24px;
+            margin-bottom: 16px;
         }
 
-        /* Маркер центра */
         .roulette-marker {
             position: absolute;
             top: 0;
@@ -265,7 +258,6 @@
             color: #d1d5db;
         }
 
-        /* Кнопки открытия */
         .action-button {
             width: 100%;
             max-width: 280px;
@@ -279,6 +271,7 @@
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(36, 129, 204, 0.2);
             transition: background-color 0.1s;
+            margin-bottom: 20px;
         }
 
         .action-button:active {
@@ -291,7 +284,85 @@
             opacity: 0.6;
         }
 
-        /* Поп-ап выигрыша */
+        /* Список шансов содержимого кейса */
+        .case-odds-container {
+            width: 100%;
+            max-width: 360px;
+            flex: 1;
+            overflow-y: auto;
+            background-color: var(--surface-color);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px;
+        }
+
+        .odds-header {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 6px;
+        }
+
+        .odds-item-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            font-size: 13px;
+        }
+
+        .odds-item-row:last-child {
+            border-bottom: none;
+        }
+
+        .odds-left-side {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .odds-item-thumb {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+            border-radius: 4px;
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .odds-item-title {
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .odds-right-side {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .odds-item-value {
+            color: var(--star-color);
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .odds-item-percent {
+            color: var(--success-color);
+            font-weight: 700;
+            font-size: 12px;
+            min-width: 50px;
+            text-align: right;
+        }
+
         #win-modal {
             display: none;
             position: fixed;
@@ -351,7 +422,6 @@
             gap: 4px;
         }
 
-        /* Инвентарь */
         .inventory-header {
             display: flex;
             justify-content: space-between;
@@ -436,7 +506,6 @@
             font-size: 14px;
         }
 
-        /* Профиль */
         .profile-container {
             background-color: var(--surface-color);
             border-radius: var(--border-radius);
@@ -485,7 +554,6 @@
             font-weight: 600;
         }
 
-        /* Нижний таб-бар (Навигация) */
         #bottom-tab-bar {
             position: absolute;
             bottom: 0;
@@ -525,7 +593,6 @@
 <body>
 
 <div id="app-container">
-    <!-- Header -->
     <header>
         <div class="user-badge">
             <div class="user-avatar" id="header-avatar">U</div>
@@ -533,11 +600,10 @@
         </div>
         <div class="balance-display">
             <span class="star-icon">⭐</span>
-            <span id="balance-value">5,000</span>
+            <span id="balance-value">0</span>
         </div>
     </header>
 
-    <!-- Content Area -->
     <div class="content-area">
         <!-- Вкладка: Кейсы -->
         <div id="cases-tab" class="tab-content active">
@@ -572,7 +638,7 @@
         </div>
     </div>
 
-    <!-- Экран открытия кейса -->
+    <!-- Экран рулетки -->
     <div id="roulette-screen">
         <button class="back-button" onclick="closeRouletteScreen()">← Назад к кейсам</button>
         <div class="roulette-case-title" id="active-case-title">📦 Бесплатный кейс</div>
@@ -583,9 +649,14 @@
         </div>
 
         <button class="action-button" id="roll-button" onclick="startCaseRoll()">Открыть кейс</button>
+
+        <!-- Список шансов содержимого кейса -->
+        <div class="case-odds-container">
+            <div class="odds-header">Содержимое и шансы выпадения:</div>
+            <div id="odds-items-list"></div>
+        </div>
     </div>
 
-    <!-- Навигация -->
     <div id="bottom-tab-bar">
         <button class="tab-button active" onclick="switchTab('cases-tab')">
             <span class="tab-icon">📦</span><span>Кейсы</span>
@@ -752,7 +823,7 @@
             items: [['Вечная свеча (пузырьковая ванна)', 45.8], ['Купидонский амулет (кристально чистый)', 23], ['Зелье любви (Ледяная королева)', 15], ['Безумная тыква (Обморожение)', 10], ['Поцелованная Лягушка (Эктолягушка)', 4], ['Астральный осколок (Аквариум)', 1.6], ['Драгоценная персика (пузырьчато-синий)', 0.6]] 
         },
         'mouth': { 
-            name: "🧼 Полость для пености рта", 
+            name: "🧼 Полость для рта", 
             cost: 12000, 
             image: "https://via.placeholder.com/150/121216/38bdf8?text=Mouth",
             items: [['Испуганный кот (Ментос)', 0.25], ['Героический шлем (Робенгуда)', 0.35], ['Знак Вестсайда (Сапфир)', 1.0], ['Сумка с добычей (Синий Версо)', 1.5], ['Весёлный шимпанзе (Кристалл)', 3.0], ['Прохладное пламя (Космический корабль)', 5.0], ['Свежие носки (Основание)', 8.0], ['Счастливое brownie (Печеньковый монстр)', 17.0], ['Клавиша ввода (Телеграм)', 25.9], ['Снежные рукавицы (Розовые манжеты)', 38.0]] 
@@ -777,18 +848,16 @@
         }
     };
 
-    // Состояние игры (State)
-    let userBalance = 15000; // Стартовый баланс игрока
-    let inventory = {};      // Хранилище: { "Название": количество }
+    let userBalance = 0; // Изначально дается 0 звезд
+    let inventory = {};      
     let isRolling = false;
     let currentCaseKey = null;
 
-    // Статистика
     let statsCasesOpened = 0;
     let statsTotalEarned = 0;
 
     function formatStars(num) {
-        if (!num) return "0";
+        if (!num && num !== 0) return "0";
         let absNum = Math.abs(num);
         if (absNum >= 1e12) return (num / 1e12).toFixed(1) + "Т";
         if (absNum >= 1e9) return (num / 1e9).toFixed(1) + "Б";
@@ -805,9 +874,8 @@
         document.getElementById('balance-value').textContent = formatStars(userBalance);
     }
 
-    // Инициализация профиля и генерация юзера
     function initUser() {
-        const nicknames = ['CryptoGamer', 'StarHustler', 'NFT_King', 'DurovFan', 'LuckyRoller'];
+        const nicknames = ['TonWhale', 'StarsHunter', 'CryptoHustler', 'PavelFan', 'GoldDigger'];
         const randomNick = nicknames[Math.floor(Math.random() * nicknames.length)] + '#' + Math.floor(1000 + Math.random() * 9000);
         
         document.getElementById('header-username').textContent = randomNick;
@@ -818,7 +886,6 @@
         updateBalanceDisplay();
     }
 
-    // Отрендерить главную витрину кейсов
     function renderCases() {
         const container = document.getElementById('cases-list-container');
         container.innerHTML = '';
@@ -842,7 +909,6 @@
         }
     }
 
-    // Переключение основных вкладок меню
     function switchTab(tabId) {
         if (isRolling) return;
 
@@ -862,7 +928,6 @@
         }
     }
 
-    // Экран самой рулетки
     function openRouletteScreen(caseKey) {
         if (isRolling) return;
         currentCaseKey = caseKey;
@@ -872,10 +937,40 @@
         document.getElementById('roll-button').textContent = caseData.cost === 0 ? 'Открыть бесплатно' : `Открыть за ⭐ ${formatStars(caseData.cost)}`;
         document.getElementById('roll-button').disabled = false;
 
-        // Предварительное заполнение ленты дефолтными иконками кейса
         generateTrackItems(caseKey);
+        renderCaseOdds(caseKey);
 
         document.getElementById('roulette-screen').style.display = 'flex';
+    }
+
+    function renderCaseOdds(caseKey) {
+        const oddsList = document.getElementById('odds-items-list');
+        oddsList.innerHTML = '';
+
+        const caseData = CASE_CONFIG[caseKey];
+        
+        // Сортируем предметы по убыванию шанса выпадения
+        const sortedItems = [...caseData.items].sort((a, b) => b[1] - a[1]);
+
+        sortedItems.forEach(([name, chance]) => {
+            const itemInfo = ITEMS[name];
+            const itemPrice = itemInfo ? itemInfo.price : 0;
+            const itemImg = itemInfo && itemInfo.img ? itemInfo.img : DEFAULT_IMG;
+
+            const row = document.createElement('div');
+            row.className = 'odds-item-row';
+            row.innerHTML = `
+                <div class="odds-left-side">
+                    <img src="${itemImg}" class="odds-item-thumb" alt="">
+                    <span class="odds-item-title">${name}</span>
+                </div>
+                <div class="odds-right-side">
+                    <span class="odds-item-value">⭐ ${formatStars(itemPrice)}</span>
+                    <span class="odds-item-percent">${chance}%</span>
+                </div>
+            `;
+            oddsList.appendChild(row);
+        });
     }
 
     function closeRouletteScreen() {
@@ -884,7 +979,6 @@
         currentCaseKey = null;
     }
 
-    // Генерация дорожки предметов для прокрутки
     function generateTrackItems(caseKey) {
         const track = document.getElementById('wheel-track');
         track.style.transition = 'none';
@@ -894,7 +988,6 @@
         const caseData = CASE_CONFIG[caseKey];
         const itemsPool = caseData.items.map(i => i[0]);
 
-        // Создаем длинную ленту (около 35 элементов для красивой прокрутки)
         for (let i = 0; i < 35; i++) {
             const randomItemName = itemsPool[Math.floor(Math.random() * itemsPool.length)];
             const el = document.createElement('div');
@@ -907,7 +1000,6 @@
         }
     }
 
-    // Выбор случайного предмета на основе процентов шанса
     function dropRandomItem(caseKey) {
         const caseData = CASE_CONFIG[caseKey];
         const rand = Math.random() * 100;
@@ -919,10 +1011,9 @@
                 return caseData.items[i][0];
             }
         }
-        return caseData.items[0][0]; // Заглушка
+        return caseData.items[0][0]; 
     }
 
-    // Запуск прокрутки
     function startCaseRoll() {
         if (isRolling || !currentCaseKey) return;
 
@@ -932,7 +1023,6 @@
             return;
         }
 
-        // Снимаем оплату за открытие
         userBalance -= caseData.cost;
         updateBalanceDisplay();
 
@@ -940,14 +1030,12 @@
         document.getElementById('roll-button').disabled = true;
 
         const track = document.getElementById('wheel-track');
-        const itemWidth = 100; // Ширина .roulette-item из CSS
-        const totalItems = 35; // Сколько сгенерировано элементов
-        const targetIndex = 28; // На каком элементе остановится маркер центра
+        const itemWidth = 100; 
+        const totalItems = 35; 
+        const targetIndex = 28; 
 
-        // Генерируем реальный выигрышный предмет
         const winItemName = dropRandomItem(currentCaseKey);
 
-        // Пересобираем дорожку, жестко вшивая выигрышный предмет на позицию targetIndex
         const itemsPool = caseData.items.map(i => i[0]);
         track.innerHTML = '';
         
@@ -965,30 +1053,21 @@
             track.appendChild(el);
         }
 
-        // Рассчитываем точное смещение трека для центрирования выигрышного предмета
         const wrapperWidth = document.querySelector('.roulette-wrapper').offsetWidth;
         const centerOffset = wrapperWidth / 2 - itemWidth / 2;
         const targetScrollX = -(targetIndex * itemWidth) + centerOffset;
 
-        // Небольшой случайный сдвиг внутри самого элемента, чтобы стрелка не указывала ровно в центр
         const innerRandomShift = Math.floor(Math.random() * 40) - 20; 
         const finalScrollX = targetScrollX + innerRandomShift;
 
-        // Запуск CSS-анимации
         track.style.transition = 'transform 4s cubic-bezier(0.1, 0.6, 0.1, 1)';
         track.style.transform = `translateX(${finalScrollX}px)`;
 
-        // Обработка финала анимации
         setTimeout(() => {
-            // Записываем предмет в инвентарь игрока
             inventory[winItemName] = (inventory[winItemName] || 0) + 1;
-            
-            // Обновляем статистику
             statsCasesOpened++;
 
-            // Показываем поп-ап выигрыша
             showWinModal(winItemName);
-            
             isRolling = false;
         }, 4100);
     }
@@ -1003,14 +1082,12 @@
 
     function closeWinModal() {
         document.getElementById('win-modal').style.display = 'none';
-        // Перегенерируем дорожку обратно в исходное состояние
         if (currentCaseKey) {
             generateTrackItems(currentCaseKey);
             document.getElementById('roll-button').disabled = false;
         }
     }
 
-    // Отрендерить инвентарь
     function renderInventory() {
         const container = document.getElementById('inventory-items-container');
         container.innerHTML = '';
@@ -1044,7 +1121,6 @@
         document.getElementById('inv-count-label').textContent = `Предметов: ${totalItemsCount}`;
     }
 
-    // Продажа всех выбитых предметов одной кнопкой
     function sellAllItems() {
         let incomingProfit = 0;
         let itemsSold = 0;
@@ -1065,7 +1141,7 @@
 
         userBalance += incomingProfit;
         statsTotalEarned += incomingProfit;
-        inventory = {}; // Очищаем весь инвентарь
+        inventory = {}; 
 
         updateBalanceDisplay();
         renderInventory();
@@ -1078,7 +1154,6 @@
         document.getElementById('stat-total-earned').textContent = `⭐ ${formatStars(statsTotalEarned)}`;
     }
 
-    // Старт работы скриптов
     window.onload = () => {
         initUser();
         renderCases();
