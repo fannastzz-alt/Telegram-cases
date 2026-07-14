@@ -536,6 +536,31 @@
             font-weight: bold;
         }
 
+        /* Общий стиль для кнопки закрепления в инвентаре */
+.pin-btn {
+    margin-top: 8px;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    width: 90%;
+}
+
+.pin-btn:active {
+    transform: scale(0.95);
+}
+
+/* Стиль кнопки, когда предмет уже ЗАКРЕПЛЕН */
+.pin-btn.pinned {
+    background-color: #2f80ed; /* Красивый синий цвет Telegram */
+    box-shadow: 0 0 8px rgba(47, 128, 237, 0.4);
+}
+
         .profile-name {
             font-size: 18px;
             font-weight: 700;
@@ -605,7 +630,10 @@
     <header>
         <div class="user-badge">
             <div class="user-avatar" id="header-avatar">U</div>
-            <div class="user-name" id="header-username">Загрузка...</div>
+            <div class="user-name username-container">
+    <span id="header-username">Загрузка...</span>
+    <img id="header-pinned-badge" src="" alt="" style="display: none;" />
+</div>
         </div>
         <div class="balance-display">
             <span class="star-icon">⭐</span>
@@ -629,7 +657,10 @@
         <div id="profile-tab" class="tab-content">
             <div class="profile-container">
                 <div class="profile-avatar" id="prof-avatar">U</div>
-                <div class="profile-name" id="prof-username">Загрузка...</div>
+                <div class="profile-name username-container">
+    <span id="prof-username">Загрузка...</span>
+    <img id="profile-pinned-badge" class="pinned-badge-style" src="" alt="" style="display: none;" />
+</div>
                 <div class="stats-list">
                     <div class="stats-row">
                         <span class="stats-label">Всего открыто кейсов:</span>
@@ -1218,30 +1249,58 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
 
     function renderInventory() {
-        const container = document.getElementById('inventory-items-container');
-        container.innerHTML = '';
+    const container = document.getElementById('inventory-items-container');
+    container.innerHTML = '';
+    
+    let totalItemsCount = 0;
+    let hasItems = false;
+    
+    for (let name in inventory) {
+        const count = inventory[name];
+        if (count <= 0) continue;
+        
+        hasItems = true;
+        totalItemsCount += count;
+        const itemData = ITEMS[name];
+        
+        const card = document.createElement('div');
+        card.className = 'inventory-item-card';
+        
+        // Определяем текст на кнопке в зависимости от того, закреплен этот предмет или нет
+        const isPinned = (pinnedItem === name);
+        const pinBtnText = isPinned ? 'Открепить 📍' : 'Закрепить 📌';
+        const pinBtnClass = isPinned ? 'pin-btn pinned' : 'pin-btn';
 
-        let totalItemsCount = 0;
-        let hasItems = false;
+        card.innerHTML = `
+            <div class="item-count-badge">x${count}</div>
+            <img src="${itemData.img ? itemData.img : DEFAULT_IMG}" class="inventory-item-img" alt="">
+            <div class="inventory-item-name">${name}</div>
+            <div class="inventory-item-price">★ ${formatStars(itemData.price)}</div>
+            <button class="${pinBtnClass}" onclick="togglePinItem('${name.replace(/'/g, "\\'")}')">${pinBtnText}</button>
+        `;
+        
+        container.appendChild(card);
+    }
+}
 
-        for (let name in inventory) {
-            const count = inventory[name];
-            if (count <= 0) continue;
-
-            hasItems = true;
-            totalItemsCount += count;
-            const itemData = ITEMS[name];
-
-            const card = document.createElement('div');
-            card.className = 'inventory-item-card';
-            card.innerHTML = `
-                <div class="item-count-badge">x${count}</div>
-                <img src="${itemData.img ? itemData.img : DEFAULT_IMG}" class="inventory-item-img" alt="">
-                <div class="inventory-item-name">${name}</div>
-                <div class="inventory-item-price">⭐ ${formatStars(itemData.price)}</div>
-            `;
-            container.appendChild(card);
-        }
+    function togglePinItem(itemName) {
+    if (pinnedItem === itemName) {
+        // Если кликнули на уже закрепленный предмет — убираем его из профиля
+        pinnedItem = null;
+    } else {
+        // Иначе закрепляем именно его
+        pinnedItem = itemName;
+    }
+    
+    // Обновляем значки в шапке и профиле
+    updatePinnedBadge();
+    
+    // Сохраняем обновленные данные в Supabase
+    saveUserData();
+    
+    // Перерисовываем инвентарь, чтобы кнопка поменяла текст с "Закрепить" на "Открепить"
+    renderInventory();
+}
 
         if (!hasItems) {
             container.innerHTML = `<div class="empty-state">Ваш инвентарь пуст.<br>Открывайте кейсы на первой вкладке!</div>`;
