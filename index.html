@@ -928,7 +928,7 @@
     async function loadUserDataFromSupabase() {
         try {
             const { data, error } = await supabase
-                .from('users_data')
+                .from('users')
                 .select('*')
                 .eq('id', tgUser.id)
                 .single();
