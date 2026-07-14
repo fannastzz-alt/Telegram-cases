@@ -989,6 +989,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             console.error("Не удалось отправить сейв в Supabase:", e);
         }
     }
+}
 
     function loadLocalBackup() {
         const backup = localStorage.getItem(`save_${tgUser.id}`);
