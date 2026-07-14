@@ -2,8 +2,14 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Telegram Cases</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Cases Bot</title>
+    
+    <!-- 1. Подключение Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- 2. Подключение Telegram (ДОБАВЬ ЭТУ СТРОКУ): -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <style>
         :root {
@@ -681,6 +687,8 @@
     // ==========================================
     const SUPABASE_URL = "https://nfqishqrigetyvnymzss.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_9y2KDUKbDFpRnnGKJA-udg_gZvu7fQk";
+
+    const supabaseClient = supabase.createClient(https://nfqishqrigetyvnymzss.supabase.co, sb_publishable_9y2KDUKbDFpRnnGKJA-udg_gZvu7fQk);
     
     const DEFAULT_IMG = "https://via.placeholder.com/150/121216/38bdf8?text=Item";
 
