@@ -1359,65 +1359,98 @@ function renderInventory() {
 }
 
 // ==================== ФУНКЦИЯ ЗАКРЕПЛЕНИЯ ПРЕДМЕТА ====================
-function togglePinItem(itemName) {
+async function togglePinItem(itemName) {
+    // Если предмет уже закреплен — открепляем его, иначе — закрепляем
     if (pinnedItem === itemName) {
-        // Если предмет уже закреплен — открепляем
         pinnedItem = null;
     } else {
-        // Иначе закрепляем новый
         pinnedItem = itemName;
     }
-    
-    // Обновляем значки возле ников
+
+    // 1. Сразу обновляем интерфейс (иконки в шапке/профиле и инвентарь)
     updatePinnedBadge();
-    
-    // Сохраняем изменения в Supabase
-    saveUserData();
-    
-    // Обновляем инвентарь, чтобы поменялись кнопки
     renderInventory();
+
+    // 2. Сохраняем изменения в базу данных Supabase
+    try {
+        const { error } = await supabaseClient
+            .from('users')
+            .update({ pinned_item: pinnedItem }) // колонка в БД должна называться pinned_item
+            .eq('id', tgUser.id);
+
+        if (error) {
+            console.error("Ошибка при сохранении закрепленного предмета в БД:", error);
+        } else {
+            console.log("Закрепленный предмет успешно сохранен в БД:", pinnedItem);
+        }
+    } catch (e) {
+        console.error("Не удалось сохранить закрепленный предмет:", e);
+    }
 }
 
     async function sellAllItems() {
-        let incomingProfit = 0;
-        let itemsSold = 0;
+    let totalEarnings = 0;
+    let soldCount = 0;
+    let newInventory = { ...inventory };
 
-        for (let name in inventory) {
-            const count = inventory[name];
-            if (count > 0) {
-                const itemData = ITEMS[name];
-                incomingProfit += itemData.price * count;
-                itemsSold += count;
-            }
+    for (let name in inventory) {
+        const count = inventory[name];
+        if (count <= 0) continue;
+
+        // ЕСЛИ ПРЕДМЕТ ЗАКРЕПЛЕН (ИЗБРАННЫЙ) — ПРОПУСКАЕМ ЕГО И НЕ ПРОДАЕМ
+        if (pinnedItem === name) {
+            console.log(`Пропускаем продажу избранного предмета: ${name}`);
+            continue;
         }
 
-        if (itemsSold === 0) {
-            alert('У вас нет предметов на продажу!');
+        const itemData = ITEMS[name];
+        if (itemData) {
+            totalEarnings += itemData.price * count;
+            soldCount += count;
+            // Обнуляем количество только у проданных предметов
+            newInventory[name] = 0; 
+        }
+    }
+
+    if (soldCount === 0) {
+        alert("Нет предметов для продажи! (Или все ваши предметы закреплены 📌)");
+        return;
+    }
+
+    // Сохраняем обновленный баланс и инвентарь в Supabase
+    try {
+        const newBalance = userBalance + totalEarnings;
+        const { error } = await supabaseClient
+            .from('users')
+            .update({ 
+                balance: newBalance, 
+                inventory: newInventory,
+                total_earned: (statsTotalEarned || 0) + totalEarnings
+            })
+            .eq('id', tgUser.id);
+
+        if (error) {
+            alert("Ошибка при сохранении продажи на сервере: " + error.message);
             return;
         }
 
-        userBalance += incomingProfit;
-        statsTotalEarned += incomingProfit;
-        inventory = {}; 
+        // Обновляем локальные переменные в игре
+        userBalance = newBalance;
+        inventory = newInventory;
+        statsTotalEarned += totalEarnings;
 
+        // Перерисовываем интерфейс
         updateBalanceDisplay();
         renderInventory();
+        if (typeof updateStatsDisplay === 'function') updateStatsDisplay();
 
-        // Сохраняем состояние после продажи
-        await saveUserData();
+        alert(`Успешно продано предметов: ${soldCount} шт.\nна сумму ★ ${formatStars(totalEarnings)}!`);
 
-        alert(`Успешно продано предметов: ${itemsSold} шт. на сумму ⭐ ${formatStars(incomingProfit)}!`);
+    } catch (e) {
+        console.error("Ошибка при продаже предметов:", e);
+        alert("Произошла непредвиденная ошибка при продаже.");
     }
-
-    function updateProfileStats() {
-        document.getElementById('stat-cases-opened').textContent = statsCasesOpened;
-        document.getElementById('stat-total-earned').textContent = `⭐ ${formatStars(statsTotalEarned)}`;
-    }
-
-    window.onload = async () => {
-        await initUserAndDB();
-        renderCases();
-    };
+}
 </script>
 </body>
 </html>
