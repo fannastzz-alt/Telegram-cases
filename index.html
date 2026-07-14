@@ -728,6 +728,8 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     const DEFAULT_IMG = "https://via.placeholder.com/150/121216/38bdf8?text=Item";
 
+    let pinnedItem = null;
+
     // База предметов
     const ITEMS = {
         'Сердце': {price: 15, img: "https://i.ibb.co.com/600jKJBY/Screenshot-20260713-032932-removebg-preview.png"}, 
@@ -1256,6 +1258,9 @@ function renderInventory() {
     let totalItemsCount = 0;
     let hasItems = false;
     
+    // Безопасная проверка: если pinnedItem не объявлен, используем null
+    const safePinnedItem = (typeof pinnedItem !== 'undefined') ? pinnedItem : null;
+    
     for (let name in inventory) {
         const count = inventory[name];
         if (count <= 0) continue;
@@ -1264,10 +1269,13 @@ function renderInventory() {
         totalItemsCount += count;
         const itemData = ITEMS[name];
         
+        // На всякий случай проверяем, существует ли предмет в базе ITEMS
+        if (!itemData) continue;
+        
         const card = document.createElement('div');
         card.className = 'inventory-item-card';
         
-        const isPinned = (pinnedItem === name);
+        const isPinned = (safePinnedItem === name);
         const pinBtnText = isPinned ? 'Открепить 📍' : 'Закрепить 📌';
         const pinBtnClass = isPinned ? 'pin-btn pinned' : 'pin-btn';
 
