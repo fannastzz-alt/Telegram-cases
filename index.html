@@ -1003,21 +1003,21 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             if (error && error.code === 'PGRST116') {
                 // Пользователь не найден, создаем новую запись в БД
                 await createNewUserInSupabase();
-} else if (data) {
-            userBalance = data.balance || 0;
-            inventory = data.inventory || {};
-            statsCasesOpened = data.cases_opened || 0;
-            statsTotalEarned = data.total_earned || 0;
-            
-            // Оборачиваем этот кусок в персональный try-catch:
-            try {
-                pinnedItem = data.pinned_item || null;
-                updatePinnedBadge();
-            } catch (innerError) {
-                console.error("Ошибка при чтении pinned_item, но продолжаем загрузку игры:", innerError);
-                pinnedItem = null;
+            } else if (data) {
+                userBalance = data.balance  0;
+                inventory = data.inventory  {};
+                statsCasesOpened = data.cases_opened  0;
+                statsTotalEarned = data.total_earned  0;
+                // Вставляем обе строчки вот сюда:
+            pinnedItem = data.pinned_item || null;
+            updatePinnedBadge();
             }
+        } catch(e) {
+            console.error("Ошибка при работе с Supabase, берем локальные данные:", e);
+            loadLocalBackup();
         }
+        updateBalanceDisplay();
+    }
 
     async function createNewUserInSupabase() {
         const newUser = {
@@ -1337,24 +1337,24 @@ function renderInventory() {
         const pinBtnText = isPinned ? 'Открепить 📍' : 'Закрепить 📌';
         const pinBtnClass = isPinned ? 'pin-btn pinned' : 'pin-btn';
 
-        card.innerHTML = `
+        card.innerHTML = 
             <div class="item-count-badge">x${count}</div>
             <img src="${itemData.img ? itemData.img : DEFAULT_IMG}" class="inventory-item-img" alt="">
             <div class="inventory-item-name">${name}</div>
             <div class="inventory-item-price">★ ${formatStars(itemData.price)}</div>
             <button class="${pinBtnClass}" onclick="togglePinItem('${name.replace(/'/g, "\\'")}')">${pinBtnText}</button>
-        `;
+        ;
         
         container.appendChild(card);
     }
 
     if (!hasItems) {
-        container.innerHTML = `<div class="empty-state">Ваш инвентарь пуст.<br>Открывайте кейсы на первой вкладке!</div>`;
+        container.innerHTML = <div class="empty-state">Ваш инвентарь пуст.<br>Открывайте кейсы на первой вкладке!</div>;
     }
 
     const countLabel = document.getElementById('inv-count-label');
     if (countLabel) {
-        countLabel.textContent = `Предметов: ${totalItemsCount}`;
+        countLabel.textContent = Предметов: ${totalItemsCount};
     }
 }
 
