@@ -685,8 +685,12 @@
     // ==========================================
     // НАСТРОЙКА SUPABASE (Замените на свои ключи)
     // ==========================================
-    const SUPABASE_URL = "https://nfqishqrigetyvnymzss.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_9y2KDUKbDFpRnnGKJA-udg_gZvu7fQk";
+    // ... твои строки 688 и 689:
+const SUPABASE_URL = "https://nfqishqrigetyvnymzss.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_9y2KDUKbDFPrnnGKJA-udg_gZvu7fQk";
+
+// ДОБАВЬ ЭТУ СТРОКУ СЮДА (примерно строка 690):
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     const DEFAULT_IMG = "https://via.placeholder.com/150/121216/38bdf8?text=Item";
 
@@ -927,12 +931,11 @@
 
     async function loadUserDataFromSupabase() {
         try {
-            const { data, error } = await supabase
-                .from('users')
-                .select('*')
-                .eq('id', tgUser.id)
-                .single();
-
+            const { data, error } = await supabaseClient
+    .from('users')
+    .select('*')
+    .eq('id', tgUser.id)
+    .single();
             if (error && error.code === 'PGRST116') {
                 // Пользователь не найден, создаем новую запись в БД
                 await createNewUserInSupabase();
@@ -958,7 +961,7 @@
             cases_opened: 0,
             total_earned: 0
         };
-        await supabase.from('users_data').insert([newUser]);
+        await supabaseClient.from('users').insert([newUser]);
     }
 
     async function saveUserData() {
