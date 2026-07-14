@@ -973,20 +973,20 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             total_earned: statsTotalEarned
         }));
 
-        if (supabase) {
-            try {
-                await supabase
-                    .from('users_data')
-                    .update({
-                        balance: userBalance,
-                        inventory: inventory,
-                        cases_opened: statsCasesOpened,
-                        total_earned: statsTotalEarned
-                    })
-                    .eq('id', tgUser.id);
-            } catch(e) {
-                console.error("Не удалось отправить сейв в Supabase:", e);
-            }
+        if (supabaseClient) {
+        try {
+            await supabaseClient
+                .from('users')
+                .update({
+                    balance: userBalance,
+                    inventory: inventory,
+                    cases_opened: statsCasesOpened,
+                    total_earned: statsTotalEarned
+                })
+                .eq('id', tgUser.id);
+
+        } catch(e) {
+            console.error("Не удалось отправить сейв в Supabase:", e);
         }
     }
 
