@@ -1248,7 +1248,8 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
     }
 
-    function renderInventory() {
+    // ==================== ФУНКЦИЯ ИНВЕНТАРЯ ====================
+function renderInventory() {
     const container = document.getElementById('inventory-items-container');
     container.innerHTML = '';
     
@@ -1266,7 +1267,6 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const card = document.createElement('div');
         card.className = 'inventory-item-card';
         
-        // Определяем текст на кнопке в зависимости от того, закреплен этот предмет или нет
         const isPinned = (pinnedItem === name);
         const pinBtnText = isPinned ? 'Открепить 📍' : 'Закрепить 📌';
         const pinBtnClass = isPinned ? 'pin-btn pinned' : 'pin-btn';
@@ -1282,31 +1282,35 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         container.appendChild(card);
     }
 
-    function togglePinItem(itemName) {
+    if (!hasItems) {
+        container.innerHTML = `<div class="empty-state">Ваш инвентарь пуст.<br>Открывайте кейсы на первой вкладке!</div>`;
+    }
+
+    const countLabel = document.getElementById('inv-count-label');
+    if (countLabel) {
+        countLabel.textContent = `Предметов: ${totalItemsCount}`;
+    }
+}
+
+// ==================== ФУНКЦИЯ ЗАКРЕПЛЕНИЯ ПРЕДМЕТА ====================
+function togglePinItem(itemName) {
     if (pinnedItem === itemName) {
-        // Если кликнули на уже закрепленный предмет — убираем его из профиля
+        // Если предмет уже закреплен — открепляем
         pinnedItem = null;
     } else {
-        // Иначе закрепляем именно его
+        // Иначе закрепляем новый
         pinnedItem = itemName;
     }
     
-    // Обновляем значки в шапке и профиле
+    // Обновляем значки возле ников
     updatePinnedBadge();
     
-    // Сохраняем обновленные данные в Supabase
+    // Сохраняем изменения в Supabase
     saveUserData();
     
-    // Перерисовываем инвентарь, чтобы кнопка поменяла текст с "Закрепить" на "Открепить"
+    // Обновляем инвентарь, чтобы поменялись кнопки
     renderInventory();
 }
-
-        if (!hasItems) {
-            container.innerHTML = `<div class="empty-state">Ваш инвентарь пуст.<br>Открывайте кейсы на первой вкладке!</div>`;
-        }
-
-        document.getElementById('inv-count-label').textContent = `Предметов: ${totalItemsCount}`;
-    }
 
     async function sellAllItems() {
         let incomingProfit = 0;
