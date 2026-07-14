@@ -561,6 +561,28 @@
     box-shadow: 0 0 8px rgba(47, 128, 237, 0.4);
 }
 
+        /* Контейнер для выравнивания ника и значка */
+.username-container {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* Расстояние между ником и иконкой */
+}
+
+/* Стили для картинок-значков */
+.pinned-badge-style {
+    width: 22px !important;
+    height: 22px !important;
+    object-fit: contain;
+    display: none; /* По умолчанию скрыт, пока JS не включит */
+}
+
+/* Чуть увеличим значок в самом профиле */
+#profile-pinned-badge {
+    width: 26px !important;
+    height: 26px !important;
+}
+
         .profile-name {
             font-size: 18px;
             font-weight: 700;
@@ -980,6 +1002,9 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 inventory = data.inventory || {};
                 statsCasesOpened = data.cases_opened || 0;
                 statsTotalEarned = data.total_earned || 0;
+                // Вставляем обе строчки вот сюда:
+            pinnedItem = data.pinned_item || null;
+            updatePinnedBadge();
             }
         } catch(e) {
             console.error("Ошибка при работе с Supabase, берем локальные данные:", e);
@@ -1233,6 +1258,33 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             await saveUserData();
         }, 4100);
     }
+
+    function updatePinnedBadge() {
+    const headerBadge = document.getElementById('header-pinned-badge');
+    const profileBadge = document.getElementById('profile-pinned-badge');
+    
+    console.log("Текущий закрепленный предмет:", pinnedItem); // Для проверки в консоли
+
+    if (pinnedItem && ITEMS && ITEMS[pinnedItem]) {
+        const itemImgSrc = ITEMS[pinnedItem].img;
+        console.log("Ссылка на картинку предмета:", itemImgSrc);
+
+        // Обновляем в шапке
+        if (headerBadge) {
+            headerBadge.src = itemImgSrc;
+            headerBadge.style.display = 'inline-block';
+        }
+        // Обновляем в профиле
+        if (profileBadge) {
+            profileBadge.src = itemImgSrc;
+            profileBadge.style.display = 'inline-block';
+        }
+    } else {
+        console.log("Ничего не закреплено или предмета нет в ITEMS");
+        if (headerBadge) headerBadge.style.display = 'none';
+        if (profileBadge) profileBadge.style.display = 'none';
+    }
+}
 
     function showWinModal(itemName) {
         const itemData = ITEMS[itemName];
