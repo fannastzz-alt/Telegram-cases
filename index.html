@@ -570,17 +570,23 @@
 }
 
 /* Стили для картинок-значков */
-.pinned-badge-style {
-    width: 22px !important;
-    height: 22px !important;
-    object-fit: contain;
-    display: none; /* По умолчанию скрыт, пока JS не включит */
+/* Стили для картинок-значков в шапке и везде */
+.pinned-badge-style, 
+#header-pinned-badge, 
+#profile-pinned-badge {
+    width: 20px !important;
+    height: 20px !important;
+    max-width: 20px !important;
+    max-height: 20px !important;
+    object-fit: contain !important;
 }
 
-/* Чуть увеличим значок в самом профиле */
+/* Чуть-чуть увеличим значок конкретно в профиле */
 #profile-pinned-badge {
-    width: 26px !important;
-    height: 26px !important;
+    width: 24px !important;
+    height: 24px !important;
+    max-width: 24px !important;
+    max-height: 24px !important;
 }
 
         .profile-name {
@@ -654,7 +660,7 @@
             <div class="user-avatar" id="header-avatar">U</div>
             <div class="user-name username-container">
     <span id="header-username">Загрузка...</span>
-    <img id="header-pinned-badge" src="" alt="" style="display: none;" />
+    <img id="header-pinned-badge" class="pinned-badge-style" src="" alt="" style="display: none;" />
 </div>
         </div>
         <div class="balance-display">
