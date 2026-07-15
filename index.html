@@ -1356,7 +1356,7 @@ function renderInventory() {
     }
 
     if (!hasItems) {
-        container.innerHTML = <div class="empty-state">Ваш инвентарь пуст.<br>Открывайте кейсы на первой вкладке!</div>;
+        container.innerHTML = `<div class="empty-state">Ваш инвентарь пуст.<br>Открывайте кейсы на первой вкладке!</div>`;
     }
 
     const countLabel = document.getElementById('inv-count-label');
