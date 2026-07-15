@@ -536,10 +536,18 @@
             font-weight: bold;
         }
 
-        .pin-btn {
+        .action-panel-btns {
+            display: flex;
+            gap: 4px;
+            width: 100%;
             margin-top: 8px;
-            padding: 6px 12px;
-            font-size: 11px;
+            justify-content: center;
+        }
+
+        .pin-btn {
+            flex: 1;
+            padding: 6px 4px;
+            font-size: 10px;
             font-weight: bold;
             border: none;
             border-radius: 8px;
@@ -547,7 +555,6 @@
             color: #fff;
             cursor: pointer;
             transition: background-color 0.2s, transform 0.1s;
-            width: 90%;
         }
 
         .pin-btn:active {
@@ -557,6 +564,31 @@
         .pin-btn.pinned {
             background-color: #2f80ed;
             box-shadow: 0 0 8px rgba(47, 128, 237, 0.4);
+        }
+
+        .fav-btn {
+            width: 32px;
+            height: 26px;
+            font-size: 12px;
+            border: none;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .fav-btn:active {
+            transform: scale(0.95);
+        }
+
+        .fav-btn.is-fav {
+            background-color: rgba(244, 180, 0, 0.2);
+            border: 1px solid var(--star-color);
+            color: var(--star-color);
         }
 
         .username-container {
@@ -644,6 +676,84 @@
         .tab-icon {
             font-size: 20px;
         }
+
+        /* Стилизация вкладки лидеров */
+        .leaderboard-switch-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .leaderboard-switch-btn {
+            flex: 1;
+            background-color: var(--surface-color);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .leaderboard-switch-btn.active {
+            background-color: var(--accent-color);
+            color: #fff;
+            border-color: var(--accent-color);
+        }
+
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .leader-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--surface-color);
+            padding: 10px 12px;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .leader-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .leader-rank {
+            font-weight: 800;
+            font-size: 14px;
+            color: var(--text-muted);
+            min-width: 20px;
+        }
+
+        .leader-row:nth-child(1) .leader-rank { color: #ffd700; }
+        .leader-row:nth-child(2) .leader-rank { color: #c0c0c0; }
+        .leader-row:nth-child(3) .leader-rank { color: #cd7f32; }
+
+        .leader-name {
+            font-weight: 500;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .leader-pinned-img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+        }
+
+        .leader-score {
+            font-weight: 700;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -695,6 +805,17 @@
                 </div>
             </div>
         </div>
+
+        <!-- ВКЛАДКА ЛИДЕРОВ -->
+        <div id="leaderboard-tab" class="tab-content">
+            <div class="leaderboard-switch-container">
+                <button class="leaderboard-switch-btn active" id="btn-top-rich" onclick="switchLeaderboardType('rich')">💰 Богачи</button>
+                <button class="leaderboard-switch-btn" id="btn-top-collectors" onclick="switchLeaderboardType('collectors')">🎒 Коллекционеры</button>
+            </div>
+            <div class="leaderboard-list" id="leaderboard-list-container">
+                <div style="text-align: center; color: var(--text-muted); padding: 40px;">Загрузка топа...</div>
+            </div>
+        </div>
     </div>
 
     <div id="roulette-screen">
@@ -724,6 +845,9 @@
         <button class="tab-button" onclick="switchTab('profile-tab')">
             <span class="tab-icon">👤</span><span>Профиль</span>
         </button>
+        <button class="tab-button" onclick="switchTab('leaderboard-tab')">
+            <span class="tab-icon">🏆</span><span>Лидеры</span>
+        </button>
     </div>
 </div>
 
@@ -749,6 +873,7 @@
     const DEFAULT_IMG = "https://via.placeholder.com/150/121216/38bdf8?text=Item";
 
     let pinnedItem = null;
+    let favourites = []; // Массив избранных предметов из Supabase
 
     // База предметов
     const ITEMS = {
@@ -760,7 +885,7 @@
         'Снуп Догг': {price: 425, img: "https://i.ibb.co.com/CKc4fRk0/Screenshot-20260713-033008-removebg-preview.png"}, 
         'Кольцо': {price: 100, img: "https://i.ibb.co.com/k68VVH9y/Screenshot-20260713-032904-removebg-preview.png"}, 
         'Алмаз': {price: 100, img: "https://i.ibb.co.com/Q144Gq7/Screenshot-20260713-032946-removebg-preview.png"}, 
-        'Лол-поп': {price: 325, img: "https://i.ibb.co.com/6J0SBxTX/Screenshot-20260713-032848-removebg-preview.png"},
+        'Лол-поп': {price: 325, img: "https://i.ibb.co.com/6J0SBxTX/Screenshot-20260713-032848-removebg-preview.png"}, 
         'Лунная змея': {price: 350, img: "https://i.ibb.co.com/kVLkTpQK/Screenshot-20260714-003206-removebg-preview.png"}, 
         'Гаджет Тамы': {price: 450, img: "https://i.ibb.co.com/LzH5SSpf/Screenshot-20260713-224333-removebg-preview.png"}, 
         'Праздничный напиток': {price: 450, img: "https://i.ibb.co.com/HT0dGRhc/Screenshot-20260714-003220-removebg-preview.png"}, 
@@ -924,6 +1049,7 @@
 
     let statsCasesOpened = 0;
     let statsTotalEarned = 0;
+    let activeLeaderboardType = 'rich'; // 'rich' или 'collectors'
 
     function formatStars(num) {
         if (!num && num !== 0) return "0";
@@ -1010,6 +1136,7 @@
                 statsCasesOpened = data.cases_opened || 0;
                 statsTotalEarned = data.total_earned || 0;
                 pinnedItem = data.pinned_item || null;
+                favourites = data.favourites || [];
                 
                 updatePinnedBadge();
                 updateProfileStats();
@@ -1030,7 +1157,8 @@
             inventory: {},
             cases_opened: 0,
             total_earned: 0,
-            pinned_item: null
+            pinned_item: null,
+            favourites: []
         };
         const { error } = await supabaseClient.from('users').insert([newUser]);
         if (!error) {
@@ -1039,6 +1167,7 @@
             statsCasesOpened = 0;
             statsTotalEarned = 0;
             pinnedItem = null;
+            favourites = [];
             
             updatePinnedBadge();
             updateProfileStats();
@@ -1052,7 +1181,8 @@
             balance: userBalance,
             inventory: inventory,
             cases_opened: statsCasesOpened,
-            total_earned: statsTotalEarned
+            total_earned: statsTotalEarned,
+            favourites: favourites
         }));
 
         if (supabaseClient) {
@@ -1063,7 +1193,8 @@
                         balance: userBalance,
                         inventory: inventory,
                         cases_opened: statsCasesOpened,
-                        total_earned: statsTotalEarned
+                        total_earned: statsTotalEarned,
+                        favourites: favourites
                     })
                     .eq('id', tgUser.id);
             } catch(e) {
@@ -1080,11 +1211,13 @@
             inventory = parsed.inventory || {};
             statsCasesOpened = parsed.cases_opened || 0;
             statsTotalEarned = parsed.total_earned || 0;
+            favourites = parsed.favourites || [];
         } else {
             userBalance = 0;
             inventory = {};
             statsCasesOpened = 0;
             statsTotalEarned = 0;
+            favourites = [];
         }
         updatePinnedBadge();
         updateProfileStats();
@@ -1139,7 +1272,12 @@
 
         document.getElementById(tabId).classList.add('active');
         
-        const btnIndex = tabId === 'cases-tab' ? 0 : tabId === 'inventory-tab' ? 1 : 2;
+        // Поиск индекса кнопки таба на панели
+        let btnIndex = 0;
+        if (tabId === 'inventory-tab') btnIndex = 1;
+        else if (tabId === 'profile-tab') btnIndex = 2;
+        else if (tabId === 'leaderboard-tab') btnIndex = 3;
+
         document.getElementById('bottom-tab-bar').children[btnIndex].classList.add('active');
 
         if(tabId === 'inventory-tab') {
@@ -1147,6 +1285,9 @@
         }
         if(tabId === 'profile-tab') {
             updateProfileStats();
+        }
+        if(tabId === 'leaderboard-tab') {
+            loadLeaderboard();
         }
     }
 
@@ -1360,12 +1501,19 @@
             const pinBtnText = isPinned ? 'Открепить 📍' : 'Закрепить 📌';
             const pinBtnClass = isPinned ? 'pin-btn pinned' : 'pin-btn';
 
+            const isFav = favourites.includes(name);
+            const favBtnClass = isFav ? 'fav-btn is-fav' : 'fav-btn';
+            const favBtnText = isFav ? '⭐' : '☆';
+
             card.innerHTML = `
                 <div class="item-count-badge">x${count}</div>
                 <img src="${itemData.img ? itemData.img : DEFAULT_IMG}" class="inventory-item-img" alt="">
                 <div class="inventory-item-name">${name}</div>
                 <div class="inventory-item-price">★ ${formatStars(itemData.price)}</div>
-                <button class="${pinBtnClass}" onclick="togglePinItem('${name.replace(/'/g, "\\'")}')">${pinBtnText}</button>
+                <div class="action-panel-btns">
+                    <button class="${pinBtnClass}" onclick="togglePinItem('${name.replace(/'/g, "\\'")}')">${pinBtnText}</button>
+                    <button class="${favBtnClass}" title="В избранное" onclick="toggleFavItem('${name.replace(/'/g, "\\'")}')">${favBtnText}</button>
+                </div>
             `;
             
             container.appendChild(card);
@@ -1406,6 +1554,32 @@
         }
     }
 
+    // ==================== ФУНКЦИЯ ИЗБРАННОГО (FAVOURITES) ====================
+    async function toggleFavItem(itemName) {
+        const index = favourites.indexOf(itemName);
+        if (index > -1) {
+            favourites.splice(index, 1); // Удаляем из избранного
+        } else {
+            favourites.push(itemName); // Добавляем в избранное
+        }
+
+        renderInventory();
+
+        try {
+            const { error } = await supabaseClient
+                .from('users')
+                .update({ favourites: favourites })
+                .eq('id', tgUser.id);
+
+            if (error) {
+                console.error("Ошибка при сохранении избранного в БД:", error);
+            }
+        } catch (e) {
+            console.error("Не удалось сохранить избранное:", e);
+        }
+    }
+
+    // ==================== ПРОДАЖА ВСЕХ ПРЕДМЕТОВ ====================
     async function sellAllItems() {
         let totalEarnings = 0;
         let soldCount = 0;
@@ -1415,7 +1589,14 @@
             const count = inventory[name];
             if (count <= 0) continue;
 
+            // Защита закрепленного предмета
             if (pinnedItem === name) {
+                console.log(`Пропускаем продажу закрепленного предмета: ${name}`);
+                continue;
+            }
+
+            // Защита предметов из Избранного (favourites)
+            if (favourites.includes(name)) {
                 console.log(`Пропускаем продажу избранного предмета: ${name}`);
                 continue;
             }
@@ -1429,7 +1610,7 @@
         }
 
         if (soldCount === 0) {
-            alert("Нет предметов для продажи! (Или все ваши предметы закреплены 📌)");
+            alert("Нет предметов для продажи! (Все ваши предметы закреплены 📌 или добавлены в избранное ⭐)");
             return;
         }
 
@@ -1465,6 +1646,97 @@
             console.error("Ошибка при продаже предметов:", e);
             alert("Произошла непредвиденная ошибка при продаже.");
         }
+    }
+
+    // ==========================================
+    // ЛОГИКА ТАБЛИЦЫ ЛИДЕРОВ (LEADERBOARD)
+    // ==========================================
+    function switchLeaderboardType(type) {
+        if (activeLeaderboardType === type) return;
+        activeLeaderboardType = type;
+
+        document.getElementById('btn-top-rich').classList.toggle('active', type === 'rich');
+        document.getElementById('btn-top-collectors').classList.toggle('active', type === 'collectors');
+
+        loadLeaderboard();
+    }
+
+    async function loadLeaderboard() {
+        const container = document.getElementById('leaderboard-list-container');
+        if (!container) return;
+        
+        container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 40px;">Загрузка списка лидеров...</div>`;
+
+        try {
+            let listData = [];
+
+            if (activeLeaderboardType === 'rich') {
+                // Топ-10 богачей по балансу
+                const { data, error } = await supabaseClient
+                    .from('users')
+                    .select('username, balance, pinned_item')
+                    .order('balance', { ascending: false })
+                    .limit(10);
+
+                if (error) throw error;
+                listData = data.map(u => ({
+                    username: u.username,
+                    pinned_item: u.pinned_item,
+                    score: `⭐ ${formatStars(u.balance)}`
+                }));
+
+            } else {
+                // Топ-10 коллекционеров по сумме вещей во View `leaderboard_by_inventory`
+                const { data, error } = await supabaseClient
+                    .from('leaderboard_by_inventory')
+                    .select('username, items_count, pinned_item');
+
+                if (error) throw error;
+                listData = data.map(u => ({
+                    username: u.username,
+                    pinned_item: u.pinned_item,
+                    score: `${u.items_count} шт.`
+                }));
+            }
+
+            renderLeaderboard(listData);
+
+        } catch (e) {
+            console.error("Ошибка загрузки таблицы лидеров:", e);
+            container.innerHTML = `<div style="text-align: center; color: #eb5757; padding: 40px;">Не удалось загрузить топ лидеров.</div>`;
+        }
+    }
+
+    function renderLeaderboard(leaders) {
+        const container = document.getElementById('leaderboard-list-container');
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (!leaders || leaders.length === 0) {
+            container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 40px;">Список пуст</div>`;
+            return;
+        }
+
+        leaders.forEach((user, index) => {
+            const row = document.createElement('div');
+            row.className = 'leader-row';
+
+            // Генерируем закрепленный предмет
+            let pinHtml = '';
+            if (user.pinned_item && ITEMS[user.pinned_item]) {
+                const imgUrl = ITEMS[user.pinned_item].img || DEFAULT_IMG;
+                pinHtml = `<img src="${imgUrl}" class="leader-pinned-img" title="Закреплено: ${user.pinned_item}" alt="">`;
+            }
+
+            row.innerHTML = `
+                <div class="leader-left">
+                    <span class="leader-rank">#${index + 1}</span>
+                    <span class="leader-name">${user.username} ${pinHtml}</span>
+                </div>
+                <span class="leader-score">${user.score}</span>
+            `;
+            container.appendChild(row);
+        });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
