@@ -1062,7 +1062,8 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         } else if (typeof initCases === 'function') {
             initCases();
         }
-
+    }
+    
     async function createNewUserInSupabase() {
         const newUser = {
             id: tgUser.id,
