@@ -22,6 +22,7 @@
             --success-color: #31b545;
             --star-color: #f4b400;
             --border-radius: 12px;
+            --danger-color: #eb5757;
         }
 
         * {
@@ -754,6 +755,80 @@
             font-weight: 700;
             font-size: 14px;
         }
+
+        /* СТИЛИ ДЛЯ КАЗИНО */
+        .casino-container {
+            background-color: var(--surface-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .casino-desc {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        .casino-dice-zone {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin: 20px 0;
+            min-height: 80px;
+            align-items: center;
+        }
+
+        .dice-box {
+            background-color: rgba(255,255,255,0.03);
+            border: 1px dashed rgba(255,255,255,0.1);
+            border-radius: var(--border-radius);
+            padding: 12px;
+            width: 90px;
+        }
+
+        .dice-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .dice-value {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .casino-input-wrapper {
+            margin-bottom: 16px;
+        }
+
+        .casino-input {
+            width: 100%;
+            max-width: 280px;
+            padding: 12px;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: var(--bg-color);
+            color: white;
+            font-size: 15px;
+            text-align: center;
+            outline: none;
+        }
+
+        .casino-input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .dice-result-msg {
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 10px;
+            min-height: 24px;
+        }
     </style>
 </head>
 <body>
@@ -784,6 +859,33 @@
                 <button class="sell-all-btn" onclick="sellAllItems()">Продать всё</button>
             </div>
             <div class="inventory-grid" id="inventory-items-container"></div>
+        </div>
+
+        <!-- ВКЛАДКА КАЗИНО -->
+        <div id="casino-tab" class="tab-content">
+            <div class="casino-container">
+                <h2>🎲 Казино «Кости»</h2>
+                <p class="casino-desc">Выкиньте больше бота на костях, чтобы удвоить вашу ставку!</p>
+                
+                <div class="casino-dice-zone">
+                    <div class="dice-box">
+                        <div class="dice-label">Вы</div>
+                        <div class="dice-value" id="player-dice-val">?</div>
+                    </div>
+                    <div style="font-size: 24px; font-weight: bold; color: var(--text-muted)">VS</div>
+                    <div class="dice-box">
+                        <div class="dice-label">Бот</div>
+                        <div class="dice-value" id="bot-dice-val">?</div>
+                    </div>
+                </div>
+
+                <div class="casino-input-wrapper">
+                    <input type="number" id="bet-amount" class="casino-input" placeholder="Введите ставку (⭐)">
+                </div>
+
+                <button class="action-button" id="play-dice-btn" onclick="playDice()">Играть на костях</button>
+                <div class="dice-result-msg" id="dice-result"></div>
+            </div>
         </div>
 
         <div id="profile-tab" class="tab-content">
@@ -841,6 +943,9 @@
         </button>
         <button class="tab-button" onclick="switchTab('inventory-tab')">
             <span class="tab-icon">🎒</span><span>Инвентарь</span>
+        </button>
+        <button class="tab-button" onclick="switchTab('casino-tab')">
+            <span class="tab-icon">🎲</span><span>Казино</span>
         </button>
         <button class="tab-button" onclick="switchTab('profile-tab')">
             <span class="tab-icon">👤</span><span>Профиль</span>
@@ -1045,6 +1150,7 @@
     let userBalance = 0;
     let inventory = {};      
     let isRolling = false;
+    let isDicePlaying = false;
     let currentCaseKey = null;
 
     let statsCasesOpened = 0;
@@ -1265,18 +1371,18 @@
     }
     
     function switchTab(tabId) {
-        if (isRolling) return;
+        if (isRolling || isDicePlaying) return;
 
         document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
         document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
 
         document.getElementById(tabId).classList.add('active');
         
-        // Поиск индекса кнопки таба на панели
         let btnIndex = 0;
         if (tabId === 'inventory-tab') btnIndex = 1;
-        else if (tabId === 'profile-tab') btnIndex = 2;
-        else if (tabId === 'leaderboard-tab') btnIndex = 3;
+        else if (tabId === 'casino-tab') btnIndex = 2;
+        else if (tabId === 'profile-tab') btnIndex = 3;
+        else if (tabId === 'leaderboard-tab') btnIndex = 4;
 
         document.getElementById('bottom-tab-bar').children[btnIndex].classList.add('active');
 
@@ -1436,6 +1542,83 @@
         }, 4100);
     }
 
+    // ==========================================
+    // ЛОГИКА ИГРЫ В КАЗИНО (КОСТИ)
+    // ==========================================
+    async function playDice() {
+        if (isDicePlaying) return;
+
+        const betInput = document.getElementById('bet-amount');
+        const bet = parseInt(betInput.value);
+        const resMsg = document.getElementById('dice-result');
+        const playerDice = document.getElementById('player-dice-val');
+        const botDice = document.getElementById('bot-dice-val');
+
+        if (isNaN(bet) || bet <= 0) {
+            alert("Введите корректную ставку!");
+            return;
+        }
+        if (bet > userBalance) {
+            alert("Недостаточно средств на балансе!");
+            return;
+        }
+
+        isDicePlaying = true;
+        document.getElementById('play-dice-btn').disabled = true;
+
+        // Снимаем ставку с визуального баланса сразу
+        userBalance -= bet;
+        updateBalanceDisplay();
+
+        resMsg.textContent = "Кости бросаются...";
+        resMsg.style.color = "var(--text-muted)";
+        playerDice.textContent = "🎲";
+        botDice.textContent = "🎲";
+
+        let rollsCount = 0;
+        const rollInterval = setInterval(() => {
+            playerDice.textContent = Math.floor(Math.random() * 6) + 1;
+            botDice.textContent = Math.floor(Math.random() * 6) + 1;
+            rollsCount++;
+            if (rollsCount > 8) {
+                clearInterval(rollInterval);
+                finishDiceRoll(bet);
+            }
+        }, 120);
+    }
+
+    async function finishDiceRoll(bet) {
+        const resMsg = document.getElementById('dice-result');
+        const playerDice = document.getElementById('player-dice-val');
+        const botDice = document.getElementById('bot-dice-val');
+
+        const playerVal = Math.floor(Math.random() * 6) + 1;
+        const botVal = Math.floor(Math.random() * 6) + 1;
+
+        playerDice.textContent = playerVal;
+        botDice.textContent = botVal;
+
+        if (playerVal > botVal) {
+            const winAmount = bet * 2;
+            userBalance += winAmount;
+            resMsg.innerHTML = `Победа! Вы выиграли ⭐ ${formatStars(winAmount)}!`;
+            resMsg.style.color = "var(--success-color)";
+        } else if (playerVal === botVal) {
+            userBalance += bet; // Возврат ставки при ничьей
+            resMsg.innerHTML = `Ничья! Ставка возвращена.`;
+            resMsg.style.color = "var(--star-color)";
+        } else {
+            resMsg.innerHTML = `Проигрыш! Бот оказался удачливее.`;
+            resMsg.style.color = "var(--danger-color)";
+        }
+
+        updateBalanceDisplay();
+        await saveUserData();
+
+        isDicePlaying = false;
+        document.getElementById('play-dice-btn').disabled = false;
+    }
+
     function updatePinnedBadge() {
         const headerBadge = document.getElementById('header-pinned-badge');
         const profileBadge = document.getElementById('profile-pinned-badge');
@@ -1558,9 +1741,9 @@
     async function toggleFavItem(itemName) {
         const index = favourites.indexOf(itemName);
         if (index > -1) {
-            favourites.splice(index, 1); // Удаляем из избранного
+            favourites.splice(index, 1); 
         } else {
-            favourites.push(itemName); // Добавляем в избранное
+            favourites.push(itemName); 
         }
 
         renderInventory();
@@ -1572,7 +1755,7 @@
                 .eq('id', tgUser.id);
 
             if (error) {
-                console.error("Ошибка при сохранении избранного в БД:", error);
+                console.error("Ошибка при сохранении главного списка избранного в БД:", error);
             }
         } catch (e) {
             console.error("Не удалось сохранить избранное:", e);
