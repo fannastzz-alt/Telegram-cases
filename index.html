@@ -1344,13 +1344,13 @@ function renderInventory() {
         const pinBtnText = isPinned ? 'Открепить 📍' : 'Закрепить 📌';
         const pinBtnClass = isPinned ? 'pin-btn pinned' : 'pin-btn';
 
-        card.innerHTML = 
+        card.innerHTML = `
             <div class="item-count-badge">x${count}</div>
             <img src="${itemData.img ? itemData.img : DEFAULT_IMG}" class="inventory-item-img" alt="">
             <div class="inventory-item-name">${name}</div>
             <div class="inventory-item-price">★ ${formatStars(itemData.price)}</div>
             <button class="${pinBtnClass}" onclick="togglePinItem('${name.replace(/'/g, "\\'")}')">${pinBtnText}</button>
-        ;
+        `;
         
         container.appendChild(card);
     }
