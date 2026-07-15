@@ -957,27 +957,31 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     // СИНХРОНИЗАЦИЯ С SUPABASE И TELEGRAM
     // ==========================================
     async function initUserAndDB() {
-        // Проверяем Telegram WebApp
-        if (window.Telegram && window.Telegram.WebApp) {
-            const tg = window.Telegram.WebApp;
-            tg.ready();
-            tg.expand();
-            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                tgUser.id = tg.initDataUnsafe.user.id.toString();
-                tgUser.username = tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name || "User";
-            }
+    // Проверяем Telegram WebApp
+    if (window.Telegram && window.Telegram.WebApp) {
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            tgUser = {
+                id: tg.initDataUnsafe.user.id.toString(),
+                username: tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name || "User"
+            };
         }
+    }
 
-        // Если нет TG, но мы тестируем в обычном браузере — создаем UUID
-        if (tgUser.id === "test_user_id") {
-            let localId = localStorage.getItem('local_id');
-            if(!localId) {
-                localId = 'usr_' + Math.random().toString(36).substr(2, 9);
-                localStorage.setItem('local_id', localId);
-            }
-            tgUser.id = localId;
-            tgUser.username = "Игрок_" + localId.slice(4, 8);
+    // Если нет TG, но мы тестируем в обычном браузере - создаем UUID
+    if (!tgUser || tgUser.id === "test_user_id") {
+        let localId = localStorage.getItem('local_id');
+        if (!localId) {
+            localId = 'usr_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('local_id', localId);
         }
+        tgUser = {
+            id: localId,
+            username: "Игрок_" + localId.slice(4, 8)
+        };
+    }
 
         // Выводим имя на экран
         document.getElementById('header-username').textContent = tgUser.username;
