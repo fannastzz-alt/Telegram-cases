@@ -8,7 +8,7 @@
     <!-- 1. Подключение Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- 2. Подключение Telegram (ДОБАВЬ ЭТУ СТРОКУ): -->
+    <!-- 2. Подключение Telegram -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <style>
@@ -122,30 +122,30 @@
         }
 
         .case-card {
-    background-color: var(--surface-color);
-    border-radius: var(--border-radius);
-    padding: 12px;   /* Уменьшили padding, чтобы освободить место для картинки */
-    height: 240px;   /* ЗАДАДИМ ФИКСИРОВАННУЮ ВЫСОТУ ДЛЯ КАРТОЧКИ */
-    box-sizing: border-box; /* Это чтобы padding не увеличивал карточку сверх высоты */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    justify-content: space-between; /* ЭТО ОЧЕНЬ ВАЖНО: прижмет картинку вверх, а цену вниз */
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    transition: transform 0.1s;
-}
+            background-color: var(--surface-color);
+            border-radius: var(--border-radius);
+            padding: 12px;
+            height: 240px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            justify-content: space-between;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.1s;
+        }
 
         .case-card:active {
             transform: scale(0.98);
         }
 
         .case-image {
-    width: 85%;       /* Картинка растянется почти на всю ширину карточки */
-    height: 120px;    /* Задаем фиксированную высоту побольше */
-    object-fit: contain; /* Картинка будет вписываться целиком без искажений */
-    margin-bottom: 8px; /* Добавим небольшой отступ до названия */
-}
+            width: 85%;
+            height: 120px;
+            object-fit: contain;
+            margin-bottom: 8px;
+        }
 
         .case-title {
             font-size: 14px;
@@ -536,58 +536,52 @@
             font-weight: bold;
         }
 
-        /* Общий стиль для кнопки закрепления в инвентаре */
-.pin-btn {
-    margin-top: 8px;
-    padding: 6px 12px;
-    font-size: 11px;
-    font-weight: bold;
-    border: none;
-    border-radius: 8px;
-    background-color: rgba(255, 255, 255, 0.08);
-    color: #fff;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
-    width: 90%;
-}
+        .pin-btn {
+            margin-top: 8px;
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            width: 90%;
+        }
 
-.pin-btn:active {
-    transform: scale(0.95);
-}
+        .pin-btn:active {
+            transform: scale(0.95);
+        }
 
-/* Стиль кнопки, когда предмет уже ЗАКРЕПЛЕН */
-.pin-btn.pinned {
-    background-color: #2f80ed; /* Красивый синий цвет Telegram */
-    box-shadow: 0 0 8px rgba(47, 128, 237, 0.4);
-}
+        .pin-btn.pinned {
+            background-color: #2f80ed;
+            box-shadow: 0 0 8px rgba(47, 128, 237, 0.4);
+        }
 
-        /* Контейнер для выравнивания ника и значка */
-.username-container {
-    display: inline-flex !important;
-    align-items: center;
-    justify-content: center;
-    gap: 8px; /* Расстояние между ником и иконкой */
-}
+        .username-container {
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
 
-/* Стили для картинок-значков */
-/* Стили для картинок-значков в шапке и везде */
-.pinned-badge-style, 
-#header-pinned-badge, 
-#profile-pinned-badge {
-    width: 28px !important;
-    height: 28px !important;
-    max-width: 28px !important;
-    max-height: 28px !important;
-    object-fit: contain !important;
-}
+        .pinned-badge-style, 
+        #header-pinned-badge, 
+        #profile-pinned-badge {
+            width: 28px !important;
+            height: 28px !important;
+            max-width: 28px !important;
+            max-height: 28px !important;
+            object-fit: contain !important;
+        }
 
-/* Чуть-чуть увеличим значок конкретно в профиле */
-#profile-pinned-badge {
-    width: 32px !important;
-    height: 32px !important;
-    max-width: 32px !important;
-    max-height: 32px !important;
-}
+        #profile-pinned-badge {
+            width: 32px !important;
+            height: 32px !important;
+            max-width: 32px !important;
+            max-height: 32px !important;
+        }
 
         .profile-name {
             font-size: 18px;
@@ -659,9 +653,9 @@
         <div class="user-badge">
             <div class="user-avatar" id="header-avatar">U</div>
             <div class="user-name username-container">
-    <span id="header-username">Загрузка...</span>
-    <img id="header-pinned-badge" class="pinned-badge-style" src="" alt="" style="display: none;" />
-</div>
+                <span id="header-username">Загрузка...</span>
+                <img id="header-pinned-badge" class="pinned-badge-style" src="" alt="" style="display: none;" />
+            </div>
         </div>
         <div class="balance-display">
             <span class="star-icon">⭐</span>
@@ -686,9 +680,9 @@
             <div class="profile-container">
                 <div class="profile-avatar" id="prof-avatar">U</div>
                 <div class="profile-name username-container">
-    <span id="prof-username">Загрузка...</span>
-    <img id="profile-pinned-badge" class="pinned-badge-style" src="" alt="" style="display: none;" />
-</div>
+                    <span id="prof-username">Загрузка...</span>
+                    <img id="profile-pinned-badge" class="pinned-badge-style" src="" alt="" style="display: none;" />
+                </div>
                 <div class="stats-list">
                     <div class="stats-row">
                         <span class="stats-label">Всего открыто кейсов:</span>
@@ -745,14 +739,12 @@
 
 <script>
     // ==========================================
-    // НАСТРОЙКА SUPABASE (Замените на свои ключи)
+    // НАСТРОЙКА SUPABASE
     // ==========================================
-    // ... твои строки 688 и 689:
-const SUPABASE_URL = "https://nfqishqrigetyvnymzss.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mcWlzaHFyaWdldHl2bnltenNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NDM2NzcsImV4cCI6MjA5OTQxOTY3N30.64PKwvKjD4YqpVPGtW43UZMI40bllVFpwUZy0ZAUVss";
+    const SUPABASE_URL = "https://nfqishqrigetyvnymzss.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5mcWlzaHFyaWdldHl2bnltenNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NDM2NzcsImV4cCI6Mj99.64PKwvKjD4YqpVPGtW43UZMI40bllVFpwUZy0ZAUVss";
 
-// ДОБАВЬ ЭТУ СТРОКУ СЮДА (примерно строка 690):
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     const DEFAULT_IMG = "https://via.placeholder.com/150/121216/38bdf8?text=Item";
 
@@ -924,9 +916,8 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
     };
 
-    // Данные пользователя (Берутся из Telegram или генерируются UUID)
     let tgUser = { id: "test_user_id", username: "LocalTester" };
-    let userBalance = 0; // Изначально дается 0 звезд
+    let userBalance = 0;
     let inventory = {};      
     let isRolling = false;
     let currentCaseKey = null;
@@ -934,7 +925,6 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let statsCasesOpened = 0;
     let statsTotalEarned = 0;
 
-    // Вспомогательные утилиты
     function formatStars(num) {
         if (!num && num !== 0) return "0";
         let absNum = Math.abs(num);
@@ -957,41 +947,36 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     // СИНХРОНИЗАЦИЯ С SUPABASE И TELEGRAM
     // ==========================================
     async function initUserAndDB() {
-    // Проверяем Telegram WebApp
-    if (window.Telegram && window.Telegram.WebApp) {
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        if (window.Telegram && window.Telegram.WebApp) {
+            const tg = window.Telegram.WebApp;
+            tg.ready();
+            tg.expand();
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                tgUser = {
+                    id: tg.initDataUnsafe.user.id.toString(),
+                    username: tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name || "User"
+                };
+            }
+        }
+
+        if (!tgUser || tgUser.id === "test_user_id") {
+            let localId = localStorage.getItem('local_id');
+            if (!localId) {
+                localId = 'usr_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('local_id', localId);
+            }
             tgUser = {
-                id: tg.initDataUnsafe.user.id.toString(),
-                username: tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name || "User"
+                id: localId,
+                username: "Игрок_" + localId.slice(4, 8)
             };
         }
-    }
 
-    // Если нет TG, но мы тестируем в обычном браузере - создаем UUID
-    if (!tgUser || tgUser.id === "test_user_id") {
-        let localId = localStorage.getItem('local_id');
-        if (!localId) {
-            localId = 'usr_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('local_id', localId);
-        }
-        tgUser = {
-            id: localId,
-            username: "Игрок_" + localId.slice(4, 8)
-        };
-    }
-
-        // Выводим имя на экран
         document.getElementById('header-username').textContent = tgUser.username;
         document.getElementById('prof-username').textContent = tgUser.username;
-        // Безопасно получаем первую букву для аватара
+        
         const avatarLetter = (tgUser && tgUser.username && tgUser.username.length > 0) 
             ? tgUser.username[0].toUpperCase() 
-            : (tgUser && tgUser.first_name && tgUser.first_name.length > 0) 
-                ? tgUser.first_name[0].toUpperCase() 
-                : 'U'; // Если вообще ничего нет, будет 'U' (User)
+            : 'U';
 
         const headerAvatar = document.getElementById('header-avatar');
         if (headerAvatar) headerAvatar.textContent = avatarLetter;
@@ -999,68 +984,41 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const profAvatar = document.getElementById('prof-avatar');
         if (profAvatar) profAvatar.textContent = avatarLetter;
 
-        if (typeof supabaseClient !== 'undefined') { // Проверяем, инициализирован ли клиент Supabase
+        if (typeof supabaseClient !== 'undefined') {
             await loadUserDataFromSupabase();
         } else {
-            // Если Supabase не подключен, берем данные из LocalStorage браузера
             loadLocalBackup();
         }
     }
 
     async function loadUserDataFromSupabase() {
-    console.log("=== Старт загрузки данных из Supabase ===");
-    try {
-        console.log("tgUser.id для запроса:", tgUser ? tgUser.id : "tgUser не определен!");
-        
-        const { data, error } = await supabaseClient
-            .from('users')
-            .select('*')
-            .eq('id', tgUser.id)
-            .single();
+        console.log("=== Старт загрузки данных из Supabase ===");
+        try {
+            const { data, error } = await supabaseClient
+                .from('users')
+                .select('*')
+                .eq('id', tgUser.id)
+                .single();
 
-        console.log("Ответ от Supabase получен. Ошибка:", error, "Данные:", data);
-
-        if (error && error.code === 'PGRST116') {
-            console.log("Пользователь не найден, вызываем создание...");
-            await createNewUserInSupabase();
-        } else if (data) {
-            console.log("Пользователь найден, парсим данные...");
-            userBalance = data.balance || 0;
-            inventory = data.inventory || {};
-            statsCasesOpened = data.cases_opened || 0;
-            statsTotalEarned = data.total_earned || 0;
-            
-            try {
+            if (error && error.code === 'PGRST116') {
+                console.log("Пользователь не найден, вызываем создание...");
+                await createNewUserInSupabase();
+            } else if (data) {
+                console.log("Пользователь найден, парсим данные...");
+                userBalance = data.balance || 0;
+                inventory = data.inventory || {};
+                statsCasesOpened = data.cases_opened || 0;
+                statsTotalEarned = data.total_earned || 0;
                 pinnedItem = data.pinned_item || null;
+                
                 updatePinnedBadge();
-            } catch (innerError) {
-                console.error("Ошибка при чтении pinned_item:", innerError);
-                pinnedItem = null;
+                updateProfileStats();
+                updateBalanceDisplay();
+                renderCases();
             }
-        }
-    } catch(e) {
-        console.error("Критическая ошибка во время запроса к Supabase:", e);
-        loadLocalBackup();
-    }
-    console.log("=== Завершение загрузки, обновляем интерфейс ===");
-        updateBalanceDisplay();
-        
-        // Принудительно обновляем статистику в профиле
-        if (typeof updateProfileStats === 'function') {
-    updateProfileStats();
-        } else {
-            // Если отдельной функции нет, обновляем текстовые поля напрямую
-            const openedEl = document.getElementById('stats-cases-opened') || document.getElementById('opened-cases'); 
-            const earnedEl = document.getElementById('stats-total-earned') || document.getElementById('total-earned');
-            if (openedEl) openedEl.textContent = statsCasesOpened;
-            if (earnedEl) earnedEl.textContent = formatStars(statsTotalEarned);
-        }
-
-        // Запускаем отрисовку кейсов на главном экране
-        if (typeof renderCases === 'function') {
-            renderCases();
-        } else if (typeof initCases === 'function') {
-            initCases();
+        } catch(e) {
+            console.error("Критическая ошибка во время запроса к Supabase:", e);
+            loadLocalBackup();
         }
     }
     
@@ -1068,16 +1026,28 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const newUser = {
             id: tgUser.id,
             username: tgUser.username,
-            balance: 0, // 0 звезд на старте
+            balance: 0, 
             inventory: {},
             cases_opened: 0,
-            total_earned: 0
+            total_earned: 0,
+            pinned_item: null
         };
-        await supabaseClient.from('users').insert([newUser]);
+        const { error } = await supabaseClient.from('users').insert([newUser]);
+        if (!error) {
+            userBalance = 0;
+            inventory = {};
+            statsCasesOpened = 0;
+            statsTotalEarned = 0;
+            pinnedItem = null;
+            
+            updatePinnedBadge();
+            updateProfileStats();
+            updateBalanceDisplay();
+            renderCases();
+        }
     }
 
     async function saveUserData() {
-        // Сначала всегда дублируем в локальное хранилище для надежности
         localStorage.setItem(`save_${tgUser.id}`, JSON.stringify({
             balance: userBalance,
             inventory: inventory,
@@ -1086,22 +1056,21 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }));
 
         if (supabaseClient) {
-        try {
-            await supabaseClient
-                .from('users')
-                .update({
-                    balance: userBalance,
-                    inventory: inventory,
-                    cases_opened: statsCasesOpened,
-                    total_earned: statsTotalEarned
-                })
-                .eq('id', tgUser.id);
-
-        } catch(e) {
-            console.error("Не удалось отправить сейв в Supabase:", e);
+            try {
+                await supabaseClient
+                    .from('users')
+                    .update({
+                        balance: userBalance,
+                        inventory: inventory,
+                        cases_opened: statsCasesOpened,
+                        total_earned: statsTotalEarned
+                    })
+                    .eq('id', tgUser.id);
+            } catch(e) {
+                console.error("Не удалось отправить сейв в Supabase:", e);
+            }
         }
     }
-}
 
     function loadLocalBackup() {
         const backup = localStorage.getItem(`save_${tgUser.id}`);
@@ -1112,19 +1081,23 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             statsCasesOpened = parsed.cases_opened || 0;
             statsTotalEarned = parsed.total_earned || 0;
         } else {
-            // Совсем пустой старт
             userBalance = 0;
             inventory = {};
             statsCasesOpened = 0;
             statsTotalEarned = 0;
         }
-                           }
+        updatePinnedBadge();
+        updateProfileStats();
+        updateBalanceDisplay();
+        renderCases();
+    }
     
     // ==========================================
     // ЛОГИКА ИГРЫ И РУЛЕТКИ
     // ==========================================
     function renderCases() {
         const container = document.getElementById('cases-list-container');
+        if (!container) return;
         container.innerHTML = '';
 
         for (let key in CASE_CONFIG) {
@@ -1147,28 +1120,16 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
 
     function updateProfileStats() {
-    // Ищем элементы статистики по разным возможным ID
-    const openedEl = document.getElementById('stats-cases-opened') || 
-                     document.getElementById('opened-cases') || 
-                     document.getElementById('profile-cases-opened'); 
-                     
-    const earnedEl = document.getElementById('stats-total-earned') || 
-                     document.getElementById('total-earned') || 
-                     document.getElementById('profile-total-earned');
+        const openedEl = document.getElementById('stat-cases-opened'); 
+        const earnedEl = document.getElementById('stat-total-earned');
 
-    // Если нашли — записываем туда наши данные из Supabase
-    if (openedEl) {
-        openedEl.textContent = statsCasesOpened || 0;
-    }
-    if (earnedEl) {
-        // Если у тебя есть функция форматирования звезд (например, formatStars), используем её, иначе пишем как есть
-        if (typeof formatStars === 'function') {
-            earnedEl.textContent = formatStars(statsTotalEarned || 0);
-        } else {
-            earnedEl.textContent = statsTotalEarned || 0;
+        if (openedEl) {
+            openedEl.textContent = statsCasesOpened;
+        }
+        if (earnedEl) {
+            earnedEl.textContent = "⭐ " + formatStars(statsTotalEarned);
         }
     }
-}
     
     function switchTab(tabId) {
         if (isRolling) return;
@@ -1329,37 +1290,31 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             showWinModal(winItemName);
             isRolling = false;
             
-            // Сохраняем состояние после открытия кейса
+            updateProfileStats();
             await saveUserData();
         }, 4100);
     }
 
     function updatePinnedBadge() {
-    const headerBadge = document.getElementById('header-pinned-badge');
-    const profileBadge = document.getElementById('profile-pinned-badge');
-    
-    console.log("Текущий закрепленный предмет:", pinnedItem); // Для проверки в консоли
+        const headerBadge = document.getElementById('header-pinned-badge');
+        const profileBadge = document.getElementById('profile-pinned-badge');
+        
+        if (pinnedItem && ITEMS && ITEMS[pinnedItem]) {
+            const itemImgSrc = ITEMS[pinnedItem].img;
 
-    if (pinnedItem && ITEMS && ITEMS[pinnedItem]) {
-        const itemImgSrc = ITEMS[pinnedItem].img;
-        console.log("Ссылка на картинку предмета:", itemImgSrc);
-
-        // Обновляем в шапке
-        if (headerBadge) {
-            headerBadge.src = itemImgSrc;
-            headerBadge.style.display = 'inline-block';
+            if (headerBadge) {
+                headerBadge.src = itemImgSrc;
+                headerBadge.style.display = 'inline-block';
+            }
+            if (profileBadge) {
+                profileBadge.src = itemImgSrc;
+                profileBadge.style.display = 'inline-block';
+            }
+        } else {
+            if (headerBadge) headerBadge.style.display = 'none';
+            if (profileBadge) profileBadge.style.display = 'none';
         }
-        // Обновляем в профиле
-        if (profileBadge) {
-            profileBadge.src = itemImgSrc;
-            profileBadge.style.display = 'inline-block';
-        }
-    } else {
-        console.log("Ничего не закреплено или предмета нет в ITEMS");
-        if (headerBadge) headerBadge.style.display = 'none';
-        if (profileBadge) profileBadge.style.display = 'none';
     }
-}
 
     function showWinModal(itemName) {
         const itemData = ITEMS[itemName];
@@ -1378,153 +1333,143 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
 
     // ==================== ФУНКЦИЯ ИНВЕНТАРЯ ====================
-function renderInventory() {
-    const container = document.getElementById('inventory-items-container');
-    container.innerHTML = '';
-    
-    let totalItemsCount = 0;
-    let hasItems = false;
-    
-    // Безопасная проверка: если pinnedItem не объявлен, используем null
-    const safePinnedItem = (typeof pinnedItem !== 'undefined') ? pinnedItem : null;
-    
-    for (let name in inventory) {
-        const count = inventory[name];
-        if (count <= 0) continue;
+    function renderInventory() {
+        const container = document.getElementById('inventory-items-container');
+        if (!container) return;
+        container.innerHTML = '';
         
-        hasItems = true;
-        totalItemsCount += count;
-        const itemData = ITEMS[name];
+        let totalItemsCount = 0;
+        let hasItems = false;
         
-        // На всякий случай проверяем, существует ли предмет в базе ITEMS
-        if (!itemData) continue;
+        const safePinnedItem = pinnedItem || null;
         
-        const card = document.createElement('div');
-        card.className = 'inventory-item-card';
-        
-        const isPinned = (safePinnedItem === name);
-        const pinBtnText = isPinned ? 'Открепить 📍' : 'Закрепить 📌';
-        const pinBtnClass = isPinned ? 'pin-btn pinned' : 'pin-btn';
+        for (let name in inventory) {
+            const count = inventory[name];
+            if (count <= 0) continue;
+            
+            hasItems = true;
+            totalItemsCount += count;
+            const itemData = ITEMS[name];
+            
+            if (!itemData) continue;
+            
+            const card = document.createElement('div');
+            card.className = 'inventory-item-card';
+            
+            const isPinned = (safePinnedItem === name);
+            const pinBtnText = isPinned ? 'Открепить 📍' : 'Закрепить 📌';
+            const pinBtnClass = isPinned ? 'pin-btn pinned' : 'pin-btn';
 
-        card.innerHTML = `
-            <div class="item-count-badge">x${count}</div>
-            <img src="${itemData.img ? itemData.img : DEFAULT_IMG}" class="inventory-item-img" alt="">
-            <div class="inventory-item-name">${name}</div>
-            <div class="inventory-item-price">★ ${formatStars(itemData.price)}</div>
-            <button class="${pinBtnClass}" onclick="togglePinItem('${name.replace(/'/g, "\\'")}')">${pinBtnText}</button>
-        `;
-        
-        container.appendChild(card);
-    }
+            card.innerHTML = `
+                <div class="item-count-badge">x${count}</div>
+                <img src="${itemData.img ? itemData.img : DEFAULT_IMG}" class="inventory-item-img" alt="">
+                <div class="inventory-item-name">${name}</div>
+                <div class="inventory-item-price">★ ${formatStars(itemData.price)}</div>
+                <button class="${pinBtnClass}" onclick="togglePinItem('${name.replace(/'/g, "\\'")}')">${pinBtnText}</button>
+            `;
+            
+            container.appendChild(card);
+        }
 
-    if (!hasItems) {
-        container.innerHTML = `<div class="empty-state">Ваш инвентарь пуст.<br>Открывайте кейсы на первой вкладке!</div>`;
-    }
+        if (!hasItems) {
+            container.innerHTML = `<div class="empty-state">Ваш инвентарь пуст.<br>Открывайте кейсы на первой вкладке!</div>`;
+        }
 
-    const countLabel = document.getElementById('inv-count-label');
+        const countLabel = document.getElementById('inv-count-label');
         if (countLabel) {
-            countLabel.textContent = totalItemsCount;
+            countLabel.textContent = "Предметов: " + totalItemsCount;
         }
-}
-
-// ==================== ФУНКЦИЯ ЗАКРЕПЛЕНИЯ ПРЕДМЕТА ====================
-async function togglePinItem(itemName) {
-    // Если предмет уже закреплен — открепляем его, иначе — закрепляем
-    if (pinnedItem === itemName) {
-        pinnedItem = null;
-    } else {
-        pinnedItem = itemName;
     }
 
-    // 1. Сразу обновляем интерфейс (иконки в шапке/профиле и инвентарь)
-    updatePinnedBadge();
-    renderInventory();
-
-    // 2. Сохраняем изменения в базу данных Supabase
-    try {
-        const { error } = await supabaseClient
-            .from('users')
-            .update({ pinned_item: pinnedItem }) // колонка в БД должна называться pinned_item
-            .eq('id', tgUser.id);
-
-        if (error) {
-            console.error("Ошибка при сохранении закрепленного предмета в БД:", error);
+    // ==================== ФУНКЦИЯ ЗАКРЕПЛЕНИЯ ПРЕДМЕТА ====================
+    async function togglePinItem(itemName) {
+        if (pinnedItem === itemName) {
+            pinnedItem = null;
         } else {
-            console.log("Закрепленный предмет успешно сохранен в БД:", pinnedItem);
+            pinnedItem = itemName;
         }
-    } catch (e) {
-        console.error("Не удалось сохранить закрепленный предмет:", e);
+
+        updatePinnedBadge();
+        renderInventory();
+
+        try {
+            const { error } = await supabaseClient
+                .from('users')
+                .update({ pinned_item: pinnedItem })
+                .eq('id', tgUser.id);
+
+            if (error) {
+                console.error("Ошибка при сохранении закрепленного предмета в БД:", error);
+            }
+        } catch (e) {
+            console.error("Не удалось сохранить закрепленный предмет:", e);
+        }
     }
-}
 
     async function sellAllItems() {
-    let totalEarnings = 0;
-    let soldCount = 0;
-    let newInventory = { ...inventory };
+        let totalEarnings = 0;
+        let soldCount = 0;
+        let newInventory = { ...inventory };
 
-    for (let name in inventory) {
-        const count = inventory[name];
-        if (count <= 0) continue;
+        for (let name in inventory) {
+            const count = inventory[name];
+            if (count <= 0) continue;
 
-        // ЕСЛИ ПРЕДМЕТ ЗАКРЕПЛЕН (ИЗБРАННЫЙ) — ПРОПУСКАЕМ ЕГО И НЕ ПРОДАЕМ
-        if (pinnedItem === name) {
-            console.log(`Пропускаем продажу избранного предмета: ${name}`);
-            continue;
+            if (pinnedItem === name) {
+                console.log(`Пропускаем продажу избранного предмета: ${name}`);
+                continue;
+            }
+
+            const itemData = ITEMS[name];
+            if (itemData) {
+                totalEarnings += itemData.price * count;
+                soldCount += count;
+                newInventory[name] = 0; 
+            }
         }
 
-        const itemData = ITEMS[name];
-        if (itemData) {
-            totalEarnings += itemData.price * count;
-            soldCount += count;
-            // Обнуляем количество только у проданных предметов
-            newInventory[name] = 0; 
-        }
-    }
-
-    if (soldCount === 0) {
-        alert("Нет предметов для продажи! (Или все ваши предметы закреплены 📌)");
-        return;
-    }
-
-    // Сохраняем обновленный баланс и инвентарь в Supabase
-    try {
-        const newBalance = userBalance + totalEarnings;
-        const { error } = await supabaseClient
-            .from('users')
-            .update({ 
-                balance: newBalance, 
-                inventory: newInventory,
-                total_earned: (statsTotalEarned || 0) + totalEarnings
-            })
-            .eq('id', tgUser.id);
-
-        if (error) {
-            alert("Ошибка при сохранении продажи на сервере: " + error.message);
+        if (soldCount === 0) {
+            alert("Нет предметов для продажи! (Или все ваши предметы закреплены 📌)");
             return;
         }
 
-        // Обновляем локальные переменные в игре
-        userBalance = newBalance;
-        inventory = newInventory;
-        statsTotalEarned += totalEarnings;
+        try {
+            const newBalance = userBalance + totalEarnings;
+            const updatedTotalEarned = (statsTotalEarned || 0) + totalEarnings;
+            
+            const { error } = await supabaseClient
+                .from('users')
+                .update({ 
+                    balance: newBalance, 
+                    inventory: newInventory,
+                    total_earned: updatedTotalEarned
+                })
+                .eq('id', tgUser.id);
 
-        // Перерисовываем интерфейс
-        updateBalanceDisplay();
-        renderInventory();
-        if (typeof updateStatsDisplay === 'function') updateStatsDisplay();
+            if (error) {
+                alert("Ошибка при сохранении продажи на сервере: " + error.message);
+                return;
+            }
 
-        alert(`Успешно продано предметов: ${soldCount} шт.\nна сумму ★ ${formatStars(totalEarnings)}!`);
+            userBalance = newBalance;
+            inventory = newInventory;
+            statsTotalEarned = updatedTotalEarned;
 
-    } catch (e) {
-        console.error("Ошибка при продаже предметов:", e);
-        alert("Произошла непредвиденная ошибка при продаже.");
+            updateBalanceDisplay();
+            renderInventory();
+            updateProfileStats();
+
+            alert(`Успешно продано предметов: ${soldCount} шт.\nна сумму ★ ${formatStars(totalEarnings)}!`);
+
+        } catch (e) {
+            console.error("Ошибка при продаже предметов:", e);
+            alert("Произошла непредвиденная ошибка при продаже.");
+        }
     }
-}
 
-    // Запускаем инициализацию при загрузке страницы
-document.addEventListener('DOMContentLoaded', () => {
-    initUserAndDB();
-});
+    document.addEventListener('DOMContentLoaded', () => {
+        initUserAndDB();
+    });
 </script>
 </body>
 </html>
