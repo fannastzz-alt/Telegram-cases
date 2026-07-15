@@ -1478,6 +1478,11 @@ async function togglePinItem(itemName) {
         alert("Произошла непредвиденная ошибка при продаже.");
     }
 }
+
+    // Запускаем инициализацию при загрузке страницы
+document.addEventListener('DOMContentLoaded', () => {
+    initUserAndDB();
+});
 </script>
 </body>
 </html>
