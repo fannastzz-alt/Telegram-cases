@@ -1361,7 +1361,7 @@ function renderInventory() {
 
     const countLabel = document.getElementById('inv-count-label');
     if (countLabel) {
-        countLabel.textContent = Предметов: ${totalItemsCount};
+        container.innerHTML = `<div class="empty-state">Ваш инвентарь пуст...</div>`;
     }
 }
 
