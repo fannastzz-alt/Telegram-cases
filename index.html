@@ -1046,8 +1046,8 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         updateBalanceDisplay();
         
         // Принудительно обновляем статистику в профиле
-        if (typeof updateStatsDisplay === 'function') {
-            updateStatsDisplay();
+        if (typeof updateProfileStats === 'function') {
+    updateProfileStats();
         } else {
             // Если отдельной функции нет, обновляем текстовые поля напрямую
             const openedEl = document.getElementById('stats-cases-opened') || document.getElementById('opened-cases'); 
@@ -1398,9 +1398,9 @@ function renderInventory() {
     }
 
     const countLabel = document.getElementById('inv-count-label');
-    if (countLabel) {
-        container.innerHTML = `<div class="empty-state">Ваш инвентарь пуст...</div>`;
-    }
+        if (countLabel) {
+            countLabel.textContent = totalItemsCount;
+        }
 }
 
 // ==================== ФУНКЦИЯ ЗАКРЕПЛЕНИЯ ПРЕДМЕТА ====================
