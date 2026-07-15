@@ -1043,8 +1043,25 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         loadLocalBackup();
     }
     console.log("=== Завершение загрузки, обновляем интерфейс ===");
-    updateBalanceDisplay();
-}
+        updateBalanceDisplay();
+        
+        // Принудительно обновляем статистику в профиле
+        if (typeof updateStatsDisplay === 'function') {
+            updateStatsDisplay();
+        } else {
+            // Если отдельной функции нет, обновляем текстовые поля напрямую
+            const openedEl = document.getElementById('stats-cases-opened') || document.getElementById('opened-cases'); 
+            const earnedEl = document.getElementById('stats-total-earned') || document.getElementById('total-earned');
+            if (openedEl) openedEl.textContent = statsCasesOpened;
+            if (earnedEl) earnedEl.textContent = formatStars(statsTotalEarned);
+        }
+
+        // Запускаем отрисовку кейсов на главном экране
+        if (typeof renderCases === 'function') {
+            renderCases();
+        } else if (typeof initCases === 'function') {
+            initCases();
+        }
 
     async function createNewUserInSupabase() {
         const newUser = {
