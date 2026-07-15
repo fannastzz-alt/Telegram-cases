@@ -1146,6 +1146,30 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
     }
 
+    function updateProfileStats() {
+    // Ищем элементы статистики по разным возможным ID
+    const openedEl = document.getElementById('stats-cases-opened') || 
+                     document.getElementById('opened-cases') || 
+                     document.getElementById('profile-cases-opened'); 
+                     
+    const earnedEl = document.getElementById('stats-total-earned') || 
+                     document.getElementById('total-earned') || 
+                     document.getElementById('profile-total-earned');
+
+    // Если нашли — записываем туда наши данные из Supabase
+    if (openedEl) {
+        openedEl.textContent = statsCasesOpened || 0;
+    }
+    if (earnedEl) {
+        // Если у тебя есть функция форматирования звезд (например, formatStars), используем её, иначе пишем как есть
+        if (typeof formatStars === 'function') {
+            earnedEl.textContent = formatStars(statsTotalEarned || 0);
+        } else {
+            earnedEl.textContent = statsTotalEarned || 0;
+        }
+    }
+}
+    
     function switchTab(tabId) {
         if (isRolling) return;
 
