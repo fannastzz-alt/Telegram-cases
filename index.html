@@ -1878,7 +1878,7 @@
                 listData = data.map(u => ({
                     username: u.username,
                     pinned_item: u.pinned_item,
-                    score: `${u.items_count} шт.`
+                    score: `⭐ ${formatStars(u.items_count)}` // Изменили "шт." на красивое отображение стоимости
                 }));
             }
 
