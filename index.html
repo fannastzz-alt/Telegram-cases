@@ -982,10 +982,20 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         // Выводим имя на экран
         document.getElementById('header-username').textContent = tgUser.username;
         document.getElementById('prof-username').textContent = tgUser.username;
-        document.getElementById('header-avatar').textContent = tgUser.username[0].toUpperCase();
-        document.getElementById('prof-avatar').textContent = tgUser.username[0].toUpperCase();
+        // Безопасно получаем первую букву для аватара
+        const avatarLetter = (tgUser && tgUser.username && tgUser.username.length > 0) 
+            ? tgUser.username[0].toUpperCase() 
+            : (tgUser && tgUser.first_name && tgUser.first_name.length > 0) 
+                ? tgUser.first_name[0].toUpperCase() 
+                : 'U'; // Если вообще ничего нет, будет 'U' (User)
 
-        if (supabase) {
+        const headerAvatar = document.getElementById('header-avatar');
+        if (headerAvatar) headerAvatar.textContent = avatarLetter;
+
+        const profAvatar = document.getElementById('prof-avatar');
+        if (profAvatar) profAvatar.textContent = avatarLetter;
+
+        if (typeof supabaseClient !== 'undefined') { // Проверяем, инициализирован ли клиент Supabase
             await loadUserDataFromSupabase();
         } else {
             // Если Supabase не подключен, берем данные из LocalStorage браузера
